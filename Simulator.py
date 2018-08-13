@@ -2,8 +2,6 @@ from MapGenerator import MapGenerator
 from RequestGenerator import RequestGenerator
 from DataGenerator import DataGenerator
 from Visualization import Visualization
-from Chromosome import Chromosome
-from GAOperator import GAOperator
 
 def main():
     INF = 10000000

@@ -127,7 +127,9 @@ class DataGenerator:
         trips = []
 
         routes = []
-        # 
+        # Check serviced requests
+        for trip in shuttle.trips :
+
 
         # Cluster First
         L = self.makeL(reqs)

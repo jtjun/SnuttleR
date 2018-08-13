@@ -1,5 +1,3 @@
-import Chromosome
-import Pool
 import matplotlib
 matplotlib.use('Agg') # because there is no display for this program
 import matplotlib.pyplot as plt

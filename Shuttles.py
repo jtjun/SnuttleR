@@ -2,7 +2,7 @@ import random
 import copy
 
 
-class Shuttle:
+class Shuttles:
     # trip : an array of requests in order of visits (positive value: ride, negative value: drop off)
     # trips : [trip1, trip2, trip3, .. tripm]
     # position : (x, y)
@@ -28,3 +28,5 @@ class Shuttle:
                     for j in range(len(self.trips[i])):
                         if self.trips[i][j] != other.trips[i][j]: return False
             return True
+
+    def
