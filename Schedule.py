@@ -1,19 +1,20 @@
+from Shuttle import Shuttle
 import random
 import copy
 
 
-class Shuttles:
-    # trip : an array of requests in order of visits (positive value: ride, negative value: drop off)
-    # trips : [trip1, trip2, trip3, .. tripm]
-    # position : (x, y)
-    def __init__(self, trips, depot):
-        self.position = depot
-        self.trips = trips
-        self.trips.sort(key=lambda trip: len(trip))
+class Schedule:
+    # shuttles : an array of shuttles [shuttle0, shuttle1, ...]
+    # serviced : an array of requests which is serviced
+    def __init__(self, shuttles, serviced = []):
+        self.shuttles = shuttles
+        self.serviced = serviced
+        pass
 
     def __str__(self):
         ret = ""
-        for idx, trip in enumerate(self.trips):
+        for idx, shuttle in enumerate(self.shuttles):
+            trip = shuttle.trip
             ret += "Shuttle {i}: {t}\n".format(i=idx, t=trip)
         return ret
 
@@ -28,5 +29,3 @@ class Shuttles:
                     for j in range(len(self.trips[i])):
                         if self.trips[i][j] != other.trips[i][j]: return False
             return True
-
-    def
