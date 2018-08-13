@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1e469ce9-2a24-4ed2-8555-66e9cadb6a8e" name="Default" comment="" />
+    <list default="true" id="1e469ce9-2a24-4ed2-8555-66e9cadb6a8e" name="Default" comment="">
+      <change afterPath="$PROJECT_DIR$/Shuttle.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Chromosome.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DataGenerator.py" beforeDir="false" afterPath="$PROJECT_DIR$/DataGenerator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GAOperator.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pool.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simulator.py" beforeDir="false" afterPath="$PROJECT_DIR$/Simulator.py" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -11,92 +19,40 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="Chromosome.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Chromosome.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <folding>
-                <element signature="e#0#13#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="DataGenerator.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="DataGenerator.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/DataGenerator.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="501">
-              <caret line="115" column="42" selection-start-line="115" selection-start-column="42" selection-end-line="115" selection-end-column="42" />
+            <state relative-caret-position="397">
+              <caret line="129" column="8" selection-start-line="129" selection-start-column="8" selection-end-line="129" selection-end-column="8" />
               <folding>
-                <element signature="e#0#33#0" expanded="true" />
+                <element signature="e#0#30#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="GAOperator.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/GAOperator.py">
+      <file leaf-file-name="Shuttle.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Shuttle.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <folding>
-                <element signature="e#0#39#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="MapGenerator.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/MapGenerator.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <folding>
-                <element signature="e#0#11#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Pool.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Pool.py">
-          <provider selected="true" editor-type-id="text-editor" />
-        </entry>
-      </file>
-      <file leaf-file-name="RequestGenerator.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/RequestGenerator.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="210">
-              <caret line="14" column="30" lean-forward="true" selection-start-line="14" selection-start-column="30" selection-end-line="14" selection-end-column="30" />
-              <folding>
-                <element signature="e#0#13#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Simulator.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/Simulator.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="317">
-              <caret line="32" column="34" selection-start-line="32" selection-start-column="34" selection-end-line="32" selection-end-column="34" />
-              <folding>
-                <element signature="e#0#37#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Visualization.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Visualization.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <folding>
-                <element signature="e#0#17#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="300">
+              <caret line="21" column="24" lean-forward="true" selection-start-line="21" selection-start-column="24" selection-end-line="21" selection-end-column="24" />
             </state>
           </provider>
         </entry>
       </file>
     </leaf>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>Chromosome</find>
+    </findStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -105,8 +61,10 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/RequestGenerator.py" />
-        <option value="$PROJECT_DIR$/DataGenerator.py" />
         <option value="$PROJECT_DIR$/Simulator.py" />
+        <option value="$PROJECT_DIR$/TickingOperator.py" />
+        <option value="$PROJECT_DIR$/Shuttle.py" />
+        <option value="$PROJECT_DIR$/DataGenerator.py" />
       </list>
     </option>
   </component>
@@ -228,6 +186,16 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Simulator.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="465">
+          <caret line="31" selection-start-line="31" selection-end-line="31" />
+          <folding>
+            <element signature="e#0#37#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Pool.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -242,19 +210,20 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/GAOperator.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state>
+        <state relative-caret-position="165">
+          <caret line="11" lean-forward="true" selection-end-line="124" />
           <folding>
             <element signature="e#0#39#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/DataGenerator.py">
+    <entry file="file://$PROJECT_DIR$/TickingOperator.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="501">
-          <caret line="115" column="42" selection-start-line="115" selection-start-column="42" selection-end-line="115" selection-end-column="42" />
+        <state relative-caret-position="1845">
+          <caret line="123" selection-start-line="123" selection-end-line="123" />
           <folding>
-            <element signature="e#0#33#0" expanded="true" />
+            <element signature="e#0#39#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -268,12 +237,19 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Simulator.py">
+    <entry file="file://$PROJECT_DIR$/Shuttle.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="317">
-          <caret line="32" column="34" selection-start-line="32" selection-start-column="34" selection-end-line="32" selection-end-column="34" />
+        <state relative-caret-position="300">
+          <caret line="21" column="24" lean-forward="true" selection-start-line="21" selection-start-column="24" selection-end-line="21" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/DataGenerator.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="397">
+          <caret line="129" column="8" selection-start-line="129" selection-start-column="8" selection-end-line="129" selection-end-column="8" />
           <folding>
-            <element signature="e#0#37#0" expanded="true" />
+            <element signature="e#0#30#0" expanded="true" />
           </folding>
         </state>
       </provider>

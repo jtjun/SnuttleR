@@ -28,7 +28,8 @@ def main():
 
     print(MAP)
     print(Reqs)
-    GAOP = GAOperator(DG, 'CFSS', ns)
+
+
 
 def Repoprt(MAP, Reqs, DG, GAOP) :
     V = Visualization()
