@@ -6,13 +6,13 @@ class RequestGenerator() :
     # request[4] = timeO := Time that request is occur < timeS
     # n : the number of requests
     # T : the maximum time of the simulation
-    def __init__(self, Map, typ = 'AR', n = 1000, T = 1440):
+    def __init__(self, MG, typ = 'AR', n = 1000, T = 1440):
         self.n = n
         self.T = T
 
-        self.Map = Map
-        self.m = Map.m
-        self.dists = Map.dists
+        self.Map = MG
+        self.m = MG.m
+        self.dists = MG.dists
 
         self.requests = []
         if(typ == 'AR') :

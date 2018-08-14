@@ -21,12 +21,13 @@ class Visualization:
 
         fig.savefig(filestr+'.png')
 
-    def drawTrips(self, MAP, Reqs, chromo, name):
+    def drawTrips(self, MAP, Reqs, schedule, name):
         fig = plt.figure()
         plt.subplot(111)
-        shutn = len(chromo.trips)
+        shutn = len(schedule.shuttles)
 
-        for (i, trip) in enumerate(chromo.trips):
+        for (i, shuttle) in enumerate(schedule.shuttles):
+            trip = shuttle.trip
             points = []
             for request in trip:
                 if request > 0:

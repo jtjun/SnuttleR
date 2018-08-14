@@ -1,3 +1,5 @@
+from Schedule import Schedule
+from Shuttle import Shuttle
 import math
 import random
 import copy
@@ -129,6 +131,9 @@ class DataGenerator:
         requests.sort(key=lambda request: request[1][2])
         trips = []
 
+        # serviced processing
+        serviced = schedule.serviced
+
         # Cluster First
         routes = []
 
@@ -156,7 +161,7 @@ class DataGenerator:
             rtrips = self.splitRoute(route)
             trips += rtrips
 
-        return Chromosome(trips)
+        return Schedule(shuttles, serviced)
 
     def splitRoute(self, route):
         tripr = self.subL(route)

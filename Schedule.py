@@ -19,13 +19,13 @@ class Schedule:
         return ret
 
     def __eq__(self, other):
-        if len(self.trips) != len(other.trips):
+        if len(self.shuttles) != len(other.shuttles):
             return False
         else:
-            for i in range(len(self.trips)):
-                if len(self.trips[i]) != len(other.trips[i]):
+            for i in range(len(self.shuttles)):
+                if len(self.shuttles[i]) != len(other.shuttles[i]):
                     return False
                 else:
-                    for j in range(len(self.trips[i])):
-                        if self.trips[i][j] != other.trips[i][j]: return False
+                    for j in range(len(self.shuttles[i])):
+                        if self.shuttles[i][j] != other.shuttles[i][j]: return False
             return True
