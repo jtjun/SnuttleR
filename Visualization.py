@@ -27,7 +27,7 @@ class Visualization:
         shutn = len(schedule.shuttles)
 
         for (i, shuttle) in enumerate(schedule.shuttles):
-            trip = shuttle.trip
+            trip = shuttle.before + shuttle.trip
             points = []
             for request in trip:
                 if request > 0:
@@ -43,5 +43,5 @@ class Visualization:
 
         plt.title('Trips')
         plt.legend(loc = 'center left', bbox_to_anchor = (0.98, 0.25))
-        fig.savefig(name+' Whole Trips.png')
+        fig.savefig('result/'+name+' Whole Trips.png')
         pass

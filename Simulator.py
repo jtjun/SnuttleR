@@ -2,19 +2,21 @@ from MapGenerator import MapGenerator
 from RequestGenerator import RequestGenerator
 from DataGenerator import DataGenerator
 from Schedule import Schedule
+from Visualization import Visualization
 from Shuttle import Shuttle
+import random
 import copy
 
 
 class Simulator:
     # as time goes by simulate situation
-    def __init__(self, m = 20, n = 70, T = 1000, MapType = 'clust', ReqType = 'CS2'):
+    def __init__(self, m = 20, n = 70, T = 1000, MapType = 'nomal', ReqType = 'AR'):
         self.m = m  # number of stations
         self.n = n  # number of requests
         self.T = T  # running time
 
-        self.MG = MapGenerator(self.m, 'nomal')
-        self.RG = RequestGenerator(self.MG, 'AR', self.n, self.T)
+        self.MG = MapGenerator(self.m, MapType)
+        self.RG = RequestGenerator(self.MG, ReqType, self.n, self.T)
         self.DG = DataGenerator(self.MG, self.RG)
         self.requests = self.RG.requests[:]
 
@@ -26,7 +28,7 @@ class Simulator:
         ret = ""
         return ret
 
-    def __main__(self): # when call the main, new schedule is generated
+    def __main__(self, numm): # when call the main, new schedule is generated
         requests = self.requests[:]
         schedule = Schedule([])
 
@@ -87,7 +89,7 @@ class Simulator:
 
         # time ticking is done
         self.late = late
-        self.report(schedule)
+        self.report(schedule, numm)
 
     def haveToGo(self, shuttle) :
         ntrip = []
@@ -103,7 +105,7 @@ class Simulator:
                 ntrip += [shuttle.trip[0], -shuttle.trip[0]]
         return ntrip
 
-    def report(self, schedule):
+    def report(self, schedule, numm):
         print('_______schedule______')
         print(len(schedule.shuttles))
         for shuttle in schedule.shuttles :
@@ -131,9 +133,12 @@ class Simulator:
 
         print(len(serviced), len(non), len(dupl), len(self.late), len(schedule.rejects))
 
+        V = Visualization()
+        V.drawTrips(self.MG, self.RG, schedule, 'test '+str(numm))
+
 if __name__ == "__main__":
-    n = 1
-    S = Simulator()
+    n = 10
+    S = Simulator(MapType='clust', ReqType='CS2')
     for i in range(n) :
         St = copy.deepcopy(S)
-        St.__main__()
+        St.__main__(i)
