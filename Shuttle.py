@@ -1,6 +1,6 @@
 import random
 import copy
-
+import math
 
 class Shuttle:
     # trip : an array of requests in order of visits (positive value: ride, negative value: drop off)
@@ -23,3 +23,11 @@ class Shuttle:
             for i in range(len(self.trip)):
                 if self.trip[i] != other.trip[i]: return False
             return True
+    
+    def moveTo(self, dest):
+        k = math.sqrt((self.loc[0] - dest[0])**2 + (self.loc[1] - dest[1])**2)
+        if  k <= 1.0:
+            self.loc = dest
+        else:
+            self.loc[0] += (dest[0] - self.loc[0]) / k
+            self.loc[1] += (dest[1] - self.loc[1]) / k

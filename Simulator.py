@@ -39,3 +39,7 @@ class Simulator:
 
             # forward to the time = t+1
             schedule = DG.cfssTicking(schedule, t+1)
+
+if __name__ == "__main__":
+    S = Simulator()
+    S.__main__()
