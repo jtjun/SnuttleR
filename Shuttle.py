@@ -4,12 +4,15 @@ import math
 
 class Shuttle:
     # trip : an array of requests in order of visits (positive value: ride, negative value: drop off)
+    # trip[k] != 0, abs(trip[k]) > 0
     # location : (x, y) tuple
-    def __init__(self, loc, trip, t):
+    def __init__(self, loc, trip, before, t = 0):
         self.loc = loc
         self.trip = trip
-        self.serviced = []
-        self.t  = t
+        # : trip[0] is always next destination
+        # ie. every tick cut the trip by t
+        self.before = before
+        self.t = t
 
     def __str__(self):
         ret = ""
@@ -24,10 +27,12 @@ class Shuttle:
                 if self.trip[i] != other.trip[i]: return False
             return True
     
-    def moveTo(self, dest):
+    def moveTo(self, dest, t):
+        self.t = t
         k = math.sqrt((self.loc[0] - dest[0])**2 + (self.loc[1] - dest[1])**2)
-        if  k <= 1.0:
+        if  k <= 1.0: # if distance < 1.0 waiting, elif distance == 1.0 apparently arrived
             self.loc = dest
         else:
-            self.loc[0] += (dest[0] - self.loc[0]) / k
-            self.loc[1] += (dest[1] - self.loc[1]) / k
+            loc = (self.loc[0] + ((dest[0] - self.loc[0])/k), \
+                   self.loc[1] + ((dest[1] - self.loc[1])/k))
+            self.loc = loc

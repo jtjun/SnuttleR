@@ -1,8 +1,10 @@
 import random
 import math
 
+tdis = 80
 class RequestGenerator() :
-    # requests : locations and time windows of requests [tuple of 5 positive integers(timeS, stationS, timeD, stationD, timeO)]
+    # requests : locations and time windows of requests
+    # tuple of 5 integers : (timeS, stationS, timeD, stationD, timeO)
     # request[4] = timeO := Time that request is occur < timeS
     # n : the number of requests
     # T : the maximum time of the simulation
@@ -33,7 +35,7 @@ class RequestGenerator() :
 
     def __str__(self):
         ret = ""
-        ret += "The number of requests : {n}\n".format(n=self.n)
+        ret += "The number of requests : {n}\n".format(n=len(self.requests))
         for request in self.requests: ret += "{r}\n".format(r=request)
         ret += "------------------------------------\n"
         return ret
@@ -50,7 +52,11 @@ class RequestGenerator() :
                         1 + random.random())  # make time interval random value between distance and 2*distance
             t0 = random.randrange(math.floor(self.T - d))
             t1 = math.floor(t0 + d)
-            lst.append((t0, sta0, t1, sta1))
+
+            td = t0 - tdis
+            if td <= 0: tO = 0
+            else : tO = random.randrange(0, td)
+            lst.append((t0, sta0, t1, sta1, tO))
             # To ensure two stations, times are different
         return lst
 
@@ -79,7 +85,11 @@ class RequestGenerator() :
             # make time interval random value between distance and 2*distance
             t0 = random.randrange(math.floor(self.T - d))
             t1 = math.floor(t0 + d)
-            lst.append((t0, sta0, t1, sta1))
+
+            td = t0 - tdis
+            if td <= 0: tO = 0
+            else: tO = random.randrange(0, td)
+            lst.append((t0, sta0, t1, sta1, tO))
             
         for i in range(self.n//2, self.n):
             # new version without using loop
@@ -91,7 +101,11 @@ class RequestGenerator() :
             # make time interval random value between distance and 2*distance
             t0 = random.randrange(math.floor(self.T - d))
             t1 = math.floor(t0 + d)
-            lst.append((t0, sta0, t1, sta1))
+
+            td = t0 - tdis
+            if td <= 0: tO = 0
+            else : tO = random.randrange(0, td)
+            lst.append((t0, sta0, t1, sta1, tO))
         return lst
 
     def cluster2(self, p):
@@ -109,7 +123,11 @@ class RequestGenerator() :
             # make time interval random value between distance and 2*distance
             t0 = random.randrange(math.floor(self.T - d))
             t1 = math.floor(t0 + d)
-            requests2.append((t0, sta0, t1, sta1))
+
+            td = t0 - tdis
+            if td <= 0: tO = 0
+            else : tO = random.randrange(0, td)
+            requests2.append((t0, sta0, t1, sta1, tO))
 
         return requests1+requests2
 

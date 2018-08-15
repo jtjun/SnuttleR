@@ -30,7 +30,8 @@ class MapGenerator:
         self.depot = (random.random()*100, random.random()*100, -1)
         self.distdepot = []
         for j in range(self.m):
-            self.distdepot.append(math.sqrt((self.stations[j][0]-self.depot[0])**2+(self.stations[j][1]-self.depot[1])**2))
+            self.distdepot.append(math.sqrt((self.stations[j][0]-self.depot[0])**2
+                                            +(self.stations[j][1]-self.depot[1])**2))
 
         self.dists = self.getDists()
         pass
