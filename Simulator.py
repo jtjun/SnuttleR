@@ -65,7 +65,7 @@ class Simulator:
                         if shuttle.loc == sta : # shuttle arrived anyway
                             shuttle.before.append(dest)
                             shuttle.trip = shuttle.trip[1:]
-                            late.append(dest)
+                            late.append(str(dest)+' late : '+str((t-destTime)))
 
                     if destTime >= t : # shuttle not late
                         if shuttle.loc == sta : # shuttle arrived well
@@ -135,7 +135,7 @@ class Simulator:
         print(left)
         print(self.late)
 
-        print(len(serviced), len(non), len(left), len(self.late))
+        print(len(schedule.shuttles), len(serviced), len(non), len(left), len(self.late))
         print('Reject')
         print('{r} {lr}'.format(r = schedule.rejects, lr = len(schedule.rejects)))
 

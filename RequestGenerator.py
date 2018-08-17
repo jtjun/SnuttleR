@@ -48,8 +48,8 @@ class RequestGenerator() :
             sta1 = (sta0 + random.randrange(1, self.m)) % self.m
             # change index 1~m to 0~m-1 for easy access of dist[][]
 
-            d = self.dists[sta0][sta1] * (
-                        1 + random.random())  # make time interval random value between distance and 2*distance
+            d = self.dists[sta0][sta1] * (1 + random.random())
+            # make time interval random value between distance and 2*distance
             t0 = random.randrange(math.floor(self.T - d))
             t1 = int(math.floor(t0 + d))
 

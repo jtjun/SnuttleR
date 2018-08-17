@@ -5,7 +5,6 @@ class Schedule:
     # serviced : an array of requests which is serviced
     def __init__(self, shuttles, rejects = []):
         self.shuttles = shuttles
-        self.serviced = []
         self.rejects = rejects
         self.rejects.sort()
         pass
@@ -50,5 +49,4 @@ class Schedule:
         print('{} {}'.format(noNeg, len(noNeg)))
         print('')
 
-        self.serviced = serviced
         return serviced
