@@ -16,7 +16,7 @@ class Shuttle:
 
     def __str__(self):
         ret = ""
-        ret += self.loc +' '+ self.trip
+        ret += str(self.loc) +' '+ str(self.trip)
         return ret
 
     def __eq__(self, other):

@@ -200,7 +200,7 @@ class DataGenerator:
                     # print('Temporary reject the request {}'.format(i))
 
         # optimize
-        # self.optimize(routes)
+        self.optimize(routes)
         return Schedule(routes, schedule.rejects)
 
     def makeL(self, requests):
@@ -217,7 +217,8 @@ class DataGenerator:
             if k in lst: trip.append(k)
         return trip
 
-    def optimize(self, shuttles):
+    def optimize(self, shuttlesO):
+        shuttles = copy.deepcopy(shuttlesO)
         idx = 0
         l = len(shuttles)
         while idx < l :
@@ -237,8 +238,7 @@ class DataGenerator:
                     ntrip = self.r1i1(shuttles[jdx], r)
                     if ntrip == shuttles[jdx].trip :
                         jdx += 1
-                        continue
-                    # r1i1 is failed
+                        continue # r1i1 is failed
                     else :
                         shuttles[jdx].trip = copy.deepcopy(ntrip)
                         mark += [r, -r]
@@ -246,8 +246,19 @@ class DataGenerator:
 
             if len(mark) == len(shuttle.trip) : # all trip are merged
                 shuttles = shuttles[:idx] + shuttles[idx+1:]
+                # print('\noptimized {}'.format(shuttle.t))
+                # print('shuttles Origin_________{}'.format(len(shuttlesO)))
+                # for shut in shuttlesO:
+                #     print(shut.trip)
+                # print('shuttles Optimized______{}'.format(len(shuttles)))
+                # for shut in shuttles:
+                #    print(shut.trip)
+
+                shuttlesO = copy.deepcopy(shuttles)
                 l = len(shuttles)
-            else : idx += 1
+            else :
+                shuttles = copy.deepcopy(shuttlesO)
+                idx += 1
 
     def r1i1(self, shuttle, x):
         tripi = shuttle.trip[:]
