@@ -1,7 +1,4 @@
 from Shuttle import Shuttle
-import random
-import copy
-
 
 class Schedule:
     # shuttles : an array of shuttles [shuttle0, shuttle1, ...]
@@ -33,7 +30,7 @@ class Schedule:
                         if self.shuttles[i][j] != other.shuttles[i][j]: return False
             return True
 
-    def getServiced(self):
+    def getServiced(self, n):
         serviced = []
         allTrip = []
         for (i, shuttle) in enumerate(self.shuttles) :
@@ -43,7 +40,7 @@ class Schedule:
 
         noPos = []
         noNeg = []
-        for i in range(1, 71) :
+        for i in range(1, n+1) :
             if i not in allTrip :
                 noPos.append(i)
             if -i not in allTrip :

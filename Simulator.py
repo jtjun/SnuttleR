@@ -118,7 +118,7 @@ class Simulator:
             print(shuttle.before, shuttle.trip, self.DG.checkAble(shuttle))
         print('_____________________\n')
 
-        serviced = schedule.getServiced()
+        serviced = schedule.getServiced(self.n)
         serviced.sort()
 
         non =[]
