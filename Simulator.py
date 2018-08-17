@@ -122,7 +122,7 @@ class Simulator:
         serviced.sort()
 
         non =[]
-        for i in range(-70, 71):
+        for i in range(-self.n, self.n+1):
             if i == 0 : continue
             if i not in serviced : non.append(i)
 
