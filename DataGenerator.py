@@ -156,55 +156,52 @@ class DataGenerator:
     def generateEDF(self, schedule, t):
         already = []
         for shuttle in schedule.shuttles :
-            already += shuttle.trip[:]
+            already += shuttle.trip + shuttle.before
 
-        serviced = schedule.getServiced()
         reqs = list(enumerate(self.requests[:]))
-        requests = list(filter(lambda req : (req[1][4] <= t) \
-                               and ((req[0]+1) not in serviced) \
-                               and ((req[0]+1) not in already), reqs))
+        requests = list(filter(lambda req : ((req[0]+1) not in already) and (req[1][4] <= t), reqs))
         # request[0] = number of request
         # request[1] = (timeS, stationS, timeD, stationD, timeO)
 
-        routes = []
-        for shuttle in schedule.shuttles :
-            routes.append(copy.deepcopy(shuttle))
+        routes = copy.deepcopy(schedule.shuttles)
 
         L = self.makeL(requests) # early deadline sorting
-        for i in L:
-            if i > 0:
-                k, l = 0, len(routes)
-                rand = list(range(l))
-                random.shuffle(rand)
-                while k < l :
-                    j = rand[k]
-                    route = routes[j].trip
-                    mutab = True
-                    for r in route: # checking available
-                        if self.CT[abs(i) - 1][abs(r) - 1] < 0:
-                            mutab = False
-                            break
-                    if mutab: # Mutually available
-                        temp = route[:]
-                        temp += [i, -i]
-                        tript = self.subL(self.L, temp)
-                        shuttle = Shuttle(routes[j].loc, tript, routes[j].before, t)
-                        if self.shuttleAble(shuttle) :
-                            routes[j] = shuttle
-                            break # available shuttle
-                    k += 1
-                if k == l:
-                    shuttle = Shuttle(self.depot, [i, -i], [], t)
-                    if self.shuttleAble(shuttle) : routes.append(shuttle)
-                    elif i not in schedule.rejects :
-                        schedule.rejects.append(i)
-                        # print('Temporary reject the request {}'.format(i))
+        for r in L:
+            if r < 0 : continue
+            j, l = 0, len(routes)
+            random.shuffle(routes)
+            while j < l :
+                shuttle = routes[j]
+                route = shuttle.trip
+                mutab = True
+                for rr in route: # checking available
+                    if self.CT[abs(r)-1][abs(rr)-1] < 0:
+                        mutab = False
+                        break
+                if mutab: # Mutually available
+                    temp = route + [r, -r]
+                    tript = self.subL(self.L, temp)
+                    nshuttle = Shuttle(shuttle.loc, tript, shuttle.before[:], t)
+                    if self.shuttleAble(nshuttle) :
+                        routes[j] = nshuttle
+                        if r in schedule.rejects :
+                            schedule.rejects.remove(r)
+                        break # available shuttle
+                j += 1
 
-                # optimize
-                # self.optimize(routes)
-                # for "shuttle.before is empty"
-                # and "merge able to other shuttle"
-        return Schedule(routes)
+            if j == l:
+                shuttle = Shuttle(self.depot, [r, -r], [], t)
+                if self.shuttleAble(shuttle) :
+                    routes.append(shuttle)
+                    if r in schedule.rejects:
+                        schedule.rejects.remove(r)
+                elif r not in schedule.rejects :
+                    schedule.rejects.append(r)
+                    # print('Temporary reject the request {}'.format(i))
+
+        # optimize
+        # self.optimize(routes)
+        return Schedule(routes, schedule.rejects)
 
     def makeL(self, requests):
         L = []
@@ -217,7 +214,7 @@ class DataGenerator:
     def subL(self, L, lst):
         trip = []
         for k in L:
-            if abs(k) in lst: trip.append(k)
+            if k in lst: trip.append(k)
         return trip
 
     def optimize(self, shuttles):

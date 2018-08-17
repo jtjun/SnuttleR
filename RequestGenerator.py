@@ -1,7 +1,7 @@
 import random
 import math
 
-tdis = 80
+tdis = 145
 class RequestGenerator() :
     # requests : locations and time windows of requests
     # tuple of 5 integers : (timeS, stationS, timeD, stationD, timeO)
@@ -51,7 +51,7 @@ class RequestGenerator() :
             d = self.dists[sta0][sta1] * (
                         1 + random.random())  # make time interval random value between distance and 2*distance
             t0 = random.randrange(math.floor(self.T - d))
-            t1 = math.floor(t0 + d)
+            t1 = int(math.floor(t0 + d))
 
             td = t0 - tdis
             if td <= 0: tO = 0
@@ -84,7 +84,7 @@ class RequestGenerator() :
             d = self.dists[sta0][sta1] * (1 + random.random())
             # make time interval random value between distance and 2*distance
             t0 = random.randrange(math.floor(self.T - d))
-            t1 = math.floor(t0 + d)
+            t1 = int(math.floor(t0 + d))
 
             td = t0 - tdis
             if td <= 0: tO = 0
@@ -100,7 +100,7 @@ class RequestGenerator() :
             d = self.dists[sta0][sta1] * (1 + random.random())
             # make time interval random value between distance and 2*distance
             t0 = random.randrange(math.floor(self.T - d))
-            t1 = math.floor(t0 + d)
+            t1 = int(math.floor(t0 + d))
 
             td = t0 - tdis
             if td <= 0: tO = 0
@@ -122,7 +122,7 @@ class RequestGenerator() :
             d = self.dists[sta0][sta1] * (1 + random.random())
             # make time interval random value between distance and 2*distance
             t0 = random.randrange(math.floor(self.T - d))
-            t1 = math.floor(t0 + d)
+            t1 = int(math.floor(t0 + d))
 
             td = t0 - tdis
             if td <= 0: tO = 0

@@ -10,7 +10,7 @@ import copy
 
 class Simulator:
     # as time goes by simulate situation
-    def __init__(self, m = 20, n = 70, T = 1000, MapType = 'nomal', ReqType = 'AR'):
+    def __init__(self, m = 20, n = 100, T = 1000, MapType = 'nomal', ReqType = 'AR'):
         self.m = m  # number of stations
         self.n = n  # number of requests
         self.T = T  # running time
@@ -62,9 +62,11 @@ class Simulator:
 
                 elif dest < 0 : # drop off
                     if destTime < t : # shuttle late for drop off
-                        if dest not in late :
-                            # print('shuttle late for drop off', dest)
+                        if shuttle.loc == sta : # shuttle arrived anyway
+                            shuttle.before.append(dest)
+                            shuttle.trip = shuttle.trip[1:]
                             late.append(dest)
+
                     if destTime >= t : # shuttle not late
                         if shuttle.loc == sta : # shuttle arrived well
                             shuttle.before.append(dest)
@@ -95,14 +97,18 @@ class Simulator:
         ntrip = []
         for r in shuttle.before :
             if -r not in shuttle.before:
-                if r < 0 :
+                if r > 0 : ntrip.append(-r)
+                else :
                     print('ERROR : trip has -r but not r')
                     print(shuttle.before, shuttle.trip)
                     return [self.n+1]
-                else : ntrip.append(-r)
+
         if len(shuttle.before) == 0 :
             if len(shuttle.trip) > 0 :
-                ntrip += [shuttle.trip[0], -shuttle.trip[0]]
+                r = abs(shuttle.trip[0])
+                ntrip = [r, -r]
+            else :
+                print('ERROR : totally empty shuttle')
         return ntrip
 
     def report(self, schedule, numm):
@@ -114,24 +120,24 @@ class Simulator:
 
         serviced = schedule.getServiced()
         serviced.sort()
-        print(serviced)
 
         non =[]
-        for i in range(-70, 0):
+        for i in range(-70, 71):
+            if i == 0 : continue
             if i not in serviced : non.append(i)
-        for j in range(1, 71):
-            if j not in serviced : non.append(i)
+
+        left = []
+        for shuttle in schedule.shuttles :
+            left += shuttle.trip
+
+        print(serviced)
         print(non)
-
-        dupl = []
-        for i in serviced :
-            if i in non :
-                dupl.append(i)
-        print(dupl)
+        print(left)
         print(self.late)
-        print(schedule.rejects)
 
-        print(len(serviced), len(non), len(dupl), len(self.late), len(schedule.rejects))
+        print(len(serviced), len(non), len(left), len(self.late))
+        print('Reject')
+        print('{r} {lr}'.format(r = schedule.rejects, lr = len(schedule.rejects)))
 
         V = Visualization()
         V.drawTrips(self.MG, self.RG, schedule, 'test '+str(numm))
