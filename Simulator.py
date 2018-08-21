@@ -34,7 +34,8 @@ class Simulator:
 
         # initialize schedule
         requestsT = list(filter(lambda r: r[4] < 0, requests))
-        schedule = self.DG.generateEDF(schedule, 0)
+        #schedule = self.DG.generateEDF(schedule, 0)
+        schedule = self.DG.generateLLF(schedule, 0)
 
         late = []
         # time is ticking
@@ -87,7 +88,8 @@ class Simulator:
             for shuttle in schedule.shuttles :
                 shuttle.trip = self.haveToGo(shuttle)[:]
                 # now all shuttles has only '-r'
-            schedule = self.DG.generateEDF(schedule, t)
+            #schedule = self.DG.generateEDF(schedule, t)
+            schedule = self.DG.generateLLF(schedule, t)
 
         # time ticking is done
         self.late = late
@@ -143,7 +145,7 @@ class Simulator:
         V.drawTrips(self.MG, self.RG, schedule, 'test '+str(numm))
 
 if __name__ == "__main__":
-    n = 10
+    n = 1
     S = Simulator(MapType='clust', ReqType='CS2')
     for i in range(n) :
         St = copy.deepcopy(S)

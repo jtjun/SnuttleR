@@ -19,6 +19,7 @@ class DataGenerator:
         requests = list(enumerate(self.requests))
         self.L = self.makeL(requests)
         self.CT = self.conflictTable()  # == C , index = Rn -1 (start with 0)
+        self.LT = self.leastTable()
         pass
 
     def __str__(self):
@@ -39,6 +40,63 @@ class DataGenerator:
                     if self.available(trip): ct[i].append(1)
                     else: ct[i].append(-1)
         return ct
+
+    def leastTable(self):
+        INF = 1000000000
+        l = len(self.requests)
+        ct = []  # conflict table
+        # -1 : conflict // 0 : i == j // 1 : available
+        for i in range(l):
+            ct.append([])
+            for j in range(l):
+                if i == j:
+                    ct[i].append(0)
+                else:
+                    trips= [[i+1, -(i+1), j+1, -(j+1)], \
+                            [i+1, j+1, -(i+1), -(j+1)], \
+                            [j+1, i+1, -(i+1), -(j+1)], \
+                            [j+1, -(j+1), i+1, -(i+1)], \
+                            [j+1, i+1, -(j+1), -(i+1)], \
+                            [i+1, j+1, -(j+1), -(i+1)]]
+                    trindx = copy.deepcopy(trips)
+                    trips.sort(key = lambda trip : self.costTrip(trip))
+                    if self.costTrip(trips[0]) != INF :
+                        ct[i].append(trindx.index(trips[0])+1)
+                    else: ct[i].append(-1)
+        return ct
+
+    def costTrip(self, trip):
+        INF, l , slack = 1000000000, 0, 0
+        ts = []
+        stas = []
+        for i in trip:
+            ia = abs(i)
+            ts.append(self.requests[ia - 1][(ia - i) // ia])
+            stas.append(self.requests[ia - 1][((ia - i) // ia) + 1])
+            l += 1
+
+        ats = [ts[0]]  # arrival times
+        i = 0
+        while i < l - 1:
+            d = self.dists[stas[i]][stas[i + 1]]
+            at = ats[i] + d  # arrival time
+
+            if trip[i + 1] < 0:  # drop off
+                if ts[i + 1] < at:
+                    return INF  # arrival late so fail
+                else:
+                    ats.append(at)
+
+            if trip[i + 1] > 0:  # pick up
+                if ts[i + 1] > at:
+                    slack += ts[i+1] - at
+                    ats.append(ts[i + 1])  # arrival earlier
+                # can calculate slack time at here
+                else:
+                    ats.append(at)
+            i += 1
+
+        return ats[len(ats)-1] - ats[0] - slack #
 
     def serviceAble(self, schedule):
         tripSet = []
@@ -246,14 +304,6 @@ class DataGenerator:
 
             if len(mark) == len(shuttle.trip) : # all trip are merged
                 shuttles = shuttles[:idx] + shuttles[idx+1:]
-                # print('\noptimized {}'.format(shuttle.t))
-                # print('shuttles Origin_________{}'.format(len(shuttlesO)))
-                # for shut in shuttlesO:
-                #     print(shut.trip)
-                # print('shuttles Optimized______{}'.format(len(shuttles)))
-                # for shut in shuttles:
-                #    print(shut.trip)
-
                 shuttlesO = copy.deepcopy(shuttles)
                 l = len(shuttles)
             else :
@@ -287,3 +337,89 @@ class DataGenerator:
         if self.shuttleAble(shuttlei):
             return tripi
         else : return shuttle.trip
+
+    def generateLLF(self, schedule, t):
+        already = []
+        for shuttle in schedule.shuttles:
+            already += shuttle.trip + shuttle.before
+
+        reqs = list(enumerate(self.requests[:]))
+        requests = list(filter(lambda req: ((req[0] + 1) not in already) and (req[1][4] <= t), reqs))
+        # request[0] = number of request
+        # request[1] = (timeS, stationS, timeD, stationD, timeO)
+
+        routes = copy.deepcopy(schedule.shuttles)
+
+        L = self.makeL(requests)  # early deadline sorting
+        for r in L:
+            if r < 0: continue
+            j, l = 0, len(routes)
+            random.shuffle(routes)
+            while j < l:
+                shuttle = routes[j]
+                route = shuttle.trip
+                mutab = True
+                rrange = [0,len(route)-1]
+                nrange = [0,len(route)-1]
+                for rr in route:  # checking available
+                    idx= self.LT[abs(r) - 1][abs(rr) - 1]
+                    if  idx < 0:
+                        mutab = False
+                        break
+                    else :
+                        self.rRange(rrange, nrange, rr, idx-1, route)
+                if mutab:  # Mutually available
+                    print(rrange, nrange, len(route))
+                    ri, nri = max(rrange), max(nrange)
+                    if nri < ri : ri = nri
+                    tript = route[:ri] + [r] + route[ri:nri] + [-r] + route[nri:]
+                    nshuttle = Shuttle(shuttle.loc, tript, shuttle.before[:], t)
+                    if self.shuttleAble(nshuttle):
+                        routes[j] = nshuttle
+                        if r in schedule.rejects:
+                            schedule.rejects.remove(r)
+                        break  # available shuttle
+                j += 1
+
+            if j == l:
+                shuttle = Shuttle(self.depot, [r, -r], [], t)
+                if self.shuttleAble(shuttle):
+                    routes.append(shuttle)
+                    if r in schedule.rejects:
+                        schedule.rejects.remove(r)
+                elif r not in schedule.rejects:
+                    schedule.rejects.append(r)
+                    # print('Temporary reject the request {}'.format(i))
+
+        # optimize
+        self.optimize(routes)
+        return Schedule(routes, schedule.rejects)
+
+    def rRange(self, rrange, nrange, rr, idx, route):
+        rr = abs(rr)
+        if rr in route : ridx = route.index(rr)
+        else : ridx = 0
+        if -rr in route : nridx = route.index(-rr)
+        else : nridx = 0
+        if idx == 0:
+            if rrange[1] > ridx : rrange[1] = ridx
+            if nrange[1] > ridx : nrange[1] = ridx
+        if idx == 1:
+            if rrange[1] > ridx: rrange[1] = ridx
+            if nrange[0] < ridx: nrange[0] = ridx
+            if nrange[1] > nridx: nrange[1] = nridx
+        if idx == 2:
+            if rrange[0] < ridx: rrange[0] = ridx
+            if rrange[1] > nridx: rrange[1] = nridx
+            if nrange[0] < ridx: nrange[0] = ridx
+            if nrange[1] > nridx: nrange[1] = nridx
+        if idx == 3:
+            if rrange[0] < nridx: rrange[0] = nridx
+            if nrange[0] < nridx: nrange[0] = nridx
+        if idx == 4:
+            if rrange[0] < ridx: rrange[0] = ridx
+            if rrange[1] > nridx: rrange[1] = nridx
+            if nrange[0] < nridx: nrange[0] = nridx
+        if idx == 5:
+            if rrange[1] > ridx: rrange[1] = ridx
+            if nrange[0] < nridx: nrange[0] = nridx
