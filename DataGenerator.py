@@ -18,7 +18,7 @@ class DataGenerator:
 
         requests = list(enumerate(self.requests))
         self.L = self.makeL(requests)
-        self.CT = self.conflictTable()  # == C , index = Rn -1 (start with 0)
+        self.CT = self.conflictTable()  # C , index = Rn -1 (start with 0)
         self.LT = self.leastTable()
         pass
 
@@ -96,7 +96,7 @@ class DataGenerator:
                     ats.append(at)
             i += 1
 
-        return ats[len(ats)-1] - ats[0] - slack #
+        return ats[len(ats)-1] - ats[0] - slack
 
     def serviceAble(self, schedule):
         tripSet = []
@@ -369,8 +369,8 @@ class DataGenerator:
                     else :
                         self.rRange(rrange, nrange, rr, idx-1, route)
                 if mutab:  # Mutually available
-                    print(rrange, nrange, len(route))
-                    ri, nri = max(rrange), max(nrange)
+                    # print(rrange, nrange, len(route))
+                    ri, nri = min(rrange), max(nrange)
                     if nri < ri : ri = nri
                     tript = route[:ri] + [r] + route[ri:nri] + [-r] + route[nri:]
                     nshuttle = Shuttle(shuttle.loc, tript, shuttle.before[:], t)

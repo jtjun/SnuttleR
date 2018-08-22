@@ -28,14 +28,14 @@ class Simulator:
         ret = ""
         return ret
 
-    def __main__(self, numm): # when call the main, new schedule is generated
+    def __main__(self, numm, typ): # when call the main, new schedule is generated
         requests = self.requests[:]
         schedule = Schedule([])
 
         # initialize schedule
         requestsT = list(filter(lambda r: r[4] < 0, requests))
-        #schedule = self.DG.generateEDF(schedule, 0)
-        schedule = self.DG.generateLLF(schedule, 0)
+        if typ == 'EDF' : schedule = self.DG.generateEDF(schedule, 0)
+        if typ == 'LLF' : schedule = self.DG.generateLLF(schedule, 0)
 
         late = []
         # time is ticking
@@ -85,15 +85,17 @@ class Simulator:
             else: continue  # there are no new requests
 
             # online processing if there are new requests
-            for shuttle in schedule.shuttles :
-                shuttle.trip = self.haveToGo(shuttle)[:]
-                # now all shuttles has only '-r'
-            #schedule = self.DG.generateEDF(schedule, t)
-            schedule = self.DG.generateLLF(schedule, t)
+            if typ == 'EDF':
+                for shuttle in schedule.shuttles :
+                    shuttle.trip = self.haveToGo(shuttle)[:]
+                    # now all shuttles has only 'have to go'
+
+            if typ == 'EDF': schedule = self.DG.generateEDF(schedule, t)
+            if typ == 'LLF': schedule = self.DG.generateLLF(schedule, t)
 
         # time ticking is done
         self.late = late
-        self.report(schedule, numm)
+        self.report(schedule, typ+' '+str(numm))
 
     def haveToGo(self, shuttle) :
         ntrip = []
@@ -137,9 +139,9 @@ class Simulator:
         print(left)
         print(self.late)
 
-        print(len(schedule.shuttles), len(serviced), len(non), len(left), len(self.late))
+        print('shutN {} / serv {} |non {} |left {} |late {}'.format(len(schedule.shuttles), len(serviced), len(non), len(left), len(self.late)))
         print('Reject')
-        print('{r} {lr}'.format(r = schedule.rejects, lr = len(schedule.rejects)))
+        print('{lr} {r}'.format(r = schedule.rejects, lr = len(schedule.rejects)))
 
         V = Visualization()
         V.drawTrips(self.MG, self.RG, schedule, 'test '+str(numm))
@@ -149,4 +151,5 @@ if __name__ == "__main__":
     S = Simulator(MapType='clust', ReqType='CS2')
     for i in range(n) :
         St = copy.deepcopy(S)
-        St.__main__(i)
+        St.__main__(i, 'EDF')
+        St.__main__(i, 'LLF')
