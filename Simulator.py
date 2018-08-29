@@ -3,6 +3,8 @@ from RequestGenerator import RequestGenerator
 from DataGenerator import DataGenerator
 from Schedule import Schedule
 from Visualization import Visualization
+from DataGeneratorGA import DataGeneratorGA
+from GAOperator import GAOperator
 from Shuttle import Shuttle
 import random
 import copy
@@ -18,6 +20,7 @@ class Simulator:
         self.MG = MapGenerator(self.m, MapType)
         self.RG = RequestGenerator(self.MG, ReqType, self.n, self.T)
         self.DG = DataGenerator(self.MG, self.RG)
+        self.DGGA = DataGeneratorGA(self.MG, self.RG)
         self.requests = self.RG.requests[:]
 
         print(self.MG)
@@ -117,6 +120,7 @@ class Simulator:
 
     def report(self, schedule, numm):
         print('_______schedule______')
+        print(numm)
         print(len(schedule.shuttles))
         for shuttle in schedule.shuttles :
             print(shuttle.before, shuttle.trip, self.DG.checkAble(shuttle))
@@ -145,6 +149,21 @@ class Simulator:
 
         V = Visualization()
         V.drawTrips(self.MG, self.RG, schedule, 'test '+str(numm))
+        print('_____________________\n')
+
+    def GA(self, MAP, Reqs, DG):
+
+        ns = 10
+        Vi = Visualization()
+        V = Visualization()
+        V.drawPoints([coord[0] for coord in MAP.stations], [coord[1] for coord in MAP.stations], 'result/stations', 'ro')
+
+        GAOP = GAOperator(DG, 'CFSS', ns)
+
+        V.drawPoints(range(len(GAOP.costs)), GAOP.costs, 'costs for each generation', 'r-')
+
+        Vi.drawTripsGA(MAP, Reqs, GAOP.init, 'result/init')
+        V.drawTripsGA(MAP, Reqs, GAOP.genes[0], 'result/final')
 
 if __name__ == "__main__":
     n = 1
@@ -153,3 +172,4 @@ if __name__ == "__main__":
         St = copy.deepcopy(S)
         St.__main__(i, 'EDF')
         St.__main__(i, 'LLF')
+        St.GA(St.MG, St.RG, St.DGGA)

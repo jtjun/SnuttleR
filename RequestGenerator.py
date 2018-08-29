@@ -15,6 +15,7 @@ class RequestGenerator() :
         self.Map = MG
         self.m = MG.m
         self.dists = MG.dists
+        self.reqN = n
 
         self.requests = []
         if(typ == 'AR') :
