@@ -12,14 +12,15 @@ import copy
 
 class Simulator:
     # as time goes by simulate situation
-    def __init__(self, m = 20, n = 100, T = 1000, MapType = 'nomal', ReqType = 'AR'):
+    def __init__(self, m = 20, n = 100, T = 1000, MapType = 'nomal', ReqType = 'AR', shutN = 10):
         self.m = m  # number of stations
         self.n = n  # number of requests
+        self.shutN = shutN  # number of shuttles
         self.T = T  # running time
 
         self.MG = MapGenerator(self.m, MapType)
         self.RG = RequestGenerator(self.MG, ReqType, self.n, self.T)
-        self.DG = DataGenerator(self.MG, self.RG)
+        self.DG = DataGenerator(self.MG, self.RG, shutN)
         self.DGGA = DataGeneratorGA(self.MG, self.RG)
         self.requests = self.RG.requests[:]
 
@@ -39,6 +40,7 @@ class Simulator:
         requestsT = list(filter(lambda r: r[4] < 0, requests))
         if typ == 'EDF' : schedule = self.DG.generateEDF(schedule, 0)
         if typ == 'LLF' : schedule = self.DG.generateLLF(schedule, 0)
+        if typ == 'GA' : schedule = self.DG.generateGA(schedule, 0)
 
         late = []
         # time is ticking
@@ -88,13 +90,14 @@ class Simulator:
             else: continue  # there are no new requests
 
             # online processing if there are new requests
-            if typ == 'EDF':
+            if typ != 'GA':
                 for shuttle in schedule.shuttles :
                     shuttle.trip = self.haveToGo(shuttle)[:]
                     # now all shuttles has only 'have to go'
 
             if typ == 'EDF': schedule = self.DG.generateEDF(schedule, t)
             if typ == 'LLF': schedule = self.DG.generateLLF(schedule, t)
+            if typ == 'GA' : schedule = self.DG.generateGA(schedule, t)
 
         # time ticking is done
         self.late = late
