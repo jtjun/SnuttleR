@@ -348,7 +348,7 @@ class DataGenerator:
         return Schedule(routes, schedule.rejects)
 
     # _______________________LLF_________________________
-    def generateLLF(self, schedule, t): # EDF with Least Slack Times
+    def generateLLF(self, schedule, t): # EDF with Maximize Slack Time
         already = []
         for shuttle in schedule.shuttles :
             already += shuttle.trip + shuttle.before
@@ -398,7 +398,7 @@ class DataGenerator:
                         schedule.rejects.append(r)
                         # print('Temporary reject the request {}'.format(i))
 
-            else : # available, So find Least Slack trip First
+            else : # available, So find Maximum Slack Trip
                 jSlack.sort(key = lambda js : -js[1])
                 j = jSlack[0][0]
                 shuttle = routes[j]
@@ -467,7 +467,7 @@ class DataGenerator:
                         schedule.rejects.append(r)
                         # print('Temporary reject the request {}'.format(i))
 
-            else : # available, So find Least Slack trip First
+            else : # available, So find Maximum Slack Trip
                 jSlack.sort(key = lambda js : -js[1])
                 j = jSlack[0][0]
                 shuttle = routes[j]
