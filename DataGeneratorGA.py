@@ -5,13 +5,18 @@ import random
 import copy
 
 class DataGeneratorGA:
-    def __init__(self, Map, Reqs):
+    def __init__(self, Map, Reqs, shutN):
         self.Map = Map
         self.Reqs = Reqs
 
         self.L = self.makeL()
         self.CT = self.conflictTable()
         self.S = self.makeSimilarRequest()
+        self.depot = Map.depot
+        self.shutN = shutN
+        self.requests = Reqs.requests
+        self.MG = Map
+        self.dists = self.MG.dists
         
     
     def __str__(self):
@@ -293,4 +298,74 @@ class DataGeneratorGA:
                     j -= 1
             ret.reverse()
             return ret
-        
+
+    def generateLLF(self): # EDF with Maximize Slack Time
+        routes = []
+        L = self.makeL() # early deadline sorting
+
+        for r in L:
+            jSlack = []
+            if r < 0 : continue
+            j, l = 0, len(routes)
+            while j < l :
+                route = routes[j]
+                mutab = True
+                for rr in route: # checking available
+                    if self.CT[abs(r)-1][abs(rr)-1] < 0:
+                        mutab = False
+                        break
+                if mutab: # Mutually available
+                    temp = route + [r, -r]
+                    tript = self.subL(temp)
+                    ableS = self.ableS(tript)
+                    if ableS[0] :
+                        jSlack.append((j, ableS[1]))
+                j += 1
+
+            if len(jSlack) < 1:
+                if len(routes) < self.shutN : # there are empty shuttle
+                    ntrip = [r, -r]
+                    if self.ableS(ntrip)[0] :
+                        routes.append(ntrip)
+
+            else : # available, So find Maximum Slack Trip
+                jSlack.sort(key = lambda js : -js[1])
+                j = jSlack[0][0]
+                route = routes[j]
+                temp = route + [r, -r]
+                tript = self.subL(temp)
+
+                routes[j] = tript[:]
+        # optimize
+        return Chromosome(self.Reqs.reqN, routes)
+
+    def ableS(self, tript):
+        slack = 0
+        loc = self.depot
+        trip = tript[:]
+        t = 0
+
+        for i in range(len(trip)) :
+            dest = trip[i]
+            destSta = self.requests[abs(dest) - 1][((abs(dest) - dest) // abs(dest)) + 1]
+            destTime = self.requests[abs(dest) - 1][(abs(dest) - dest) // abs(dest)]
+
+            # shuttle arrived next destination
+            if i== 0 : t += self.MG.getLocDist(loc, destSta)
+            else :
+                depa = trip[i-1]
+                depaSta = self.requests[abs(depa) - 1][((abs(depa) - depa) // abs(depa)) + 1]
+                t += self.dists[depaSta][destSta]
+
+            if dest > 0:  # pick up
+                if destTime >= t : # arrive early : waiting
+                    slack += (destTime - t) # slack time
+                    t = destTime
+                # else : arrive late / don't care
+
+            elif dest < 0:  # drop off
+                if destTime < t : # shuttle late for drop off
+                    return [False, 0]
+                else : # shuttle not late / don't care
+                    slack += (destTime - t)
+        return [True, slack]

@@ -23,6 +23,9 @@ class GAOperator:
         elif initial == 'CFSS':
             for i in range(Nggene):
                 self.genes.append(DG.generateCFSS())
+        elif initial == 'LLF':
+            for i in range(Nggene):
+                self.genes.append(DG.generateLLF())
 
         
         for i in range(Nggene, Ngene):

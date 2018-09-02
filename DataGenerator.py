@@ -296,13 +296,14 @@ class DataGenerator:
         else : return shuttle.trip
 
     #_______________________EDF_________________________
-    def generateEDF(self, schedule, t):
+    def generateEDF(self, schedule, t, off=False):
         already = []
         for shuttle in schedule.shuttles :
             already += shuttle.trip + shuttle.before
 
         reqs = list(enumerate(self.requests[:]))
         requests = list(filter(lambda req : ((req[0]+1) not in already) and (req[1][4] <= t), reqs))
+        if off : requests = reqs
         # request[0] = number of request
         # request[1] = (timeS, stationS, timeD, stationD, timeO)
 
@@ -350,13 +351,14 @@ class DataGenerator:
         return Schedule(routes, schedule.rejects)
 
     # _______________________LLF_________________________
-    def generateLLF(self, schedule, t): # EDF with Maximize Slack Time
+    def generateLLF(self, schedule, t, off=False): # EDF with Maximize Slack Time
         already = []
         for shuttle in schedule.shuttles :
             already += shuttle.trip + shuttle.before
 
         reqs = list(enumerate(self.requests[:]))
         requests = list(filter(lambda req : ((req[0]+1) not in already) and (req[1][4] <= t), reqs))
+        if off : requests = reqs
         # request[0] = number of request
         # request[1] = (timeS, stationS, timeD, stationD, timeO)
 
@@ -416,7 +418,7 @@ class DataGenerator:
         return Schedule(routes, schedule.rejects)
 
     # _______________________GA_________________________
-    def generateGA(self, schedule, t): # Genetic Algorithm
+    def generateGA(self, schedule, t, off=False): # Genetic Algorithm
         if t==0 : return self.generateLLF(schedule, t)
         already = []
         for shuttle in schedule.shuttles:
@@ -424,6 +426,7 @@ class DataGenerator:
 
         reqs = list(enumerate(self.requests[:]))
         requests = list(filter(lambda req: ((req[0] + 1) not in already) and (req[1][4] <= t), reqs))
+        if off : requests = reqs
         # request[0] = number of request
         # request[1] = (timeS, stationS, timeD, stationD, timeO)
 
@@ -436,7 +439,7 @@ class DataGenerator:
             j, l = 0, len(routes)
             while j < l:
                 shuttle = routes[j]
-                tript = self.insert(shuttle, r)
+                tript = self.insert(shuttle, r, t)
 
                 if shuttle.trip != tript:  # insert available
                     nshuttle = Shuttle(shuttle.loc, tript, shuttle.before[:], t)
@@ -462,7 +465,7 @@ class DataGenerator:
                 jSlack.sort(key=lambda js: -js[1])
                 j = jSlack[0][0]
                 shuttle = routes[j]
-                tript = self.insert(shuttle, r)
+                tript = self.insert(shuttle, r, t)
 
                 nshuttle = Shuttle(shuttle.loc, tript, shuttle.before[:], t)
                 routes[j] = nshuttle
@@ -474,39 +477,7 @@ class DataGenerator:
         self.optimize(routes)
         return Schedule(routes, schedule.rejects)
 
-
-    def insert(self, shuttle, x):
-        tripi = shuttle.trip[:]
-        tx = self.requests[x - 1][0]
-        tnx = self.requests[x - 1][2]
-
-        idx = 0
-        while idx < len(tripi): # insert 'x' to trip
-            r = tripi[idx]
-            t = self.requests[abs(r) - 1][(abs(r) - r) // abs(r)]
-            if t > tx:
-                tripi = tripi[:idx] + [x] + tripi[idx:]
-                break
-            idx += 1
-        if idx == len(tripi) :
-            tripi = tripi[:] + [x]
-
-        idx = len(tripi) - 1
-        while idx > -1: # insert '-x' to trip
-            r = tripi[(len(tripi)-1)-idx]
-            t = self.requests[abs(r) - 1][(abs(r) - r) // abs(r)]
-            if tnx > t:
-                tripi = tripi[:idx] + [-x] + tripi[idx:]
-                break
-            idx -= 1
-        # add selected request to trip1
-
-        shuttlei = Shuttle(shuttle.loc, tripi, shuttle.before, shuttle.t)
-        if self.shuttleAbleS(shuttlei)[0]:
-            return tripi
-        else : return shuttle.trip
-
-    def insertMS(self, shuttle, x, t):
+    def insert(self, shuttle, x, shutT):
         tripi = shuttle.trip[:]
         tx = self.requests[x - 1][0]
         tnx = self.requests[x - 1][2]
@@ -530,28 +501,23 @@ class DataGenerator:
             if tnx > t:
                 nxable.append(idx)
             idx -= 1
+        if len(nxable) < 1 :
+            nxable.append(len(tripi))
 
         # add selected request to trip1
         position = []
-        if len(nxable) < 1:
-            nxable.append(len(tripi)+1)
-        else :
-            for xidx in xable :
-                for nxidx in nxable:
-                    if nxidx < xidx : continue
+        for xidx in xable :
+            for nxidx in nxable:
+                if nxidx < xidx : continue
 
-                    temp = tripi[:xidx] + [x] + tripi[xidx:nxidx] + [-x] + tripi[nxidx:]
-                    nshuttle = Shuttle(shuttle.loc, temp, shuttle.before[:], t)
-                    ableS = self.shuttleAbleS(nshuttle)
+                temp = tripi[:xidx] + [x] + tripi[xidx:nxidx] + [-x] + tripi[nxidx:]
+                nshuttle = Shuttle(shuttle.loc, temp, shuttle.before[:], shutT)
+                ableS = self.shuttleAbleS(nshuttle)
+                if ableS[0] : # available trip
+                    position.append((temp[:], ableS[1]))
 
-                    if ableS[0] : # available trip
-                        position.append(((xidx, nxidx), ableS[1]))
-            position.sort(key = lambda ps : -ps[1])
-            pos = position[0][0]
-                                    
+        if len(position) < 1 :
+            return shuttle.trip
 
-
-        shuttlei = Shuttle(shuttle.loc, tripi, shuttle.before, shuttle.t)
-        if self.shuttleAbleS(shuttlei)[0]:
-            return tripi
-        else : return shuttle.trip
+        position.sort(key = lambda ps : -ps[1])
+        return position[0][0]

@@ -21,7 +21,7 @@ class Simulator:
         self.MG = MapGenerator(self.m, MapType)
         self.RG = RequestGenerator(self.MG, ReqType, self.n, self.T)
         self.DG = DataGenerator(self.MG, self.RG, shutN)
-        self.DGGA = DataGeneratorGA(self.MG, self.RG)
+        self.DGGA = DataGeneratorGA(self.MG, self.RG, self.shutN)
         self.requests = self.RG.requests[:]
 
         print(self.MG)
@@ -32,9 +32,16 @@ class Simulator:
         ret = ""
         return ret
 
-    def __main__(self, numm, typ): # when call the main, new schedule is generated
+    def __main__(self, numm, typ, off): # when call the main, new schedule is generated
         requests = self.requests[:]
         schedule = Schedule([])
+
+        if off :
+            if typ == 'EDF' : schedule = self.DG.generateEDF(schedule, 0, True)
+            if typ == 'LLF' : schedule = self.DG.generateLLF(schedule, 0, True)
+            if typ == 'GA' : schedule = self.DG.generateGA(schedule, 0, True)
+            self.report(schedule, typ + ' off ' + str(numm))
+            return 0
 
         # initialize schedule
         requestsT = list(filter(lambda r: r[4] < 0, requests))
@@ -154,14 +161,12 @@ class Simulator:
         V.drawTrips(self.MG, self.RG, schedule, 'test '+str(numm))
         print('_____________________\n')
 
-    def GA(self, MAP, Reqs, DG):
-
-        ns = 10
+    def GA(self, MAP, Reqs, DG, ns = 10):
         Vi = Visualization()
         V = Visualization()
         V.drawPoints([coord[0] for coord in MAP.stations], [coord[1] for coord in MAP.stations], 'result/stations', 'ro')
 
-        GAOP = GAOperator(DG, 'CFSS', ns)
+        GAOP = GAOperator(DG, 'LLF', ns)
 
         V.drawPoints(range(len(GAOP.costs)), GAOP.costs, 'costs for each generation', 'r-')
 
@@ -170,10 +175,12 @@ class Simulator:
 
 if __name__ == "__main__":
     n = 1
+    off=False
     S = Simulator(MapType='clust', ReqType='CS2')
     for i in range(n) :
         St = copy.deepcopy(S)
-        St.__main__(i, 'EDF')
-        St.__main__(i, 'LLF')
-        St.__main__(i, 'GA')
-        #St.GA(St.MG, St.RG, St.DGGA)
+        St.__main__(i, 'EDF', off)
+        St.__main__(i, 'EDF', True)
+        St.__main__(i, 'LLF', off)
+        St.__main__(i, 'LLF', True)
+        St.GA(St.MG, St.RG, St.DGGA, 10)
