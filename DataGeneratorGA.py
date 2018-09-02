@@ -337,6 +337,7 @@ class DataGeneratorGA:
 
                 routes[j] = tript[:]
         # optimize
+        self.optimize(routes)
         return Chromosome(self.Reqs.reqN, routes)
 
     def ableS(self, tript):
@@ -369,3 +370,64 @@ class DataGeneratorGA:
                 else : # shuttle not late / don't care
                     slack += (destTime - t)
         return [True, slack]
+
+    def optimize(self, trips0):
+        trips = copy.deepcopy(trips0)
+        idx = 0
+        l = len(trips)
+        while idx < l :
+            mark = []
+            trip = trips[idx]
+            for r in trip :
+                if r < 0 : continue
+                jdx = 0
+                while jdx < l :
+                    if jdx == idx :
+                        jdx += 1
+                        continue
+                    ntrip = self.r1i1(trips[jdx], r)
+                    if ntrip == trips[jdx] :
+                        jdx += 1
+                        continue # r1i1 is failed
+                    else :
+                        trips[jdx] = copy.deepcopy(ntrip)
+                        mark += [r, -r]
+                        break
+
+            if len(mark) == len(trip) : # all trip are merged
+                trips = trips[:idx] + trips[idx+1:]
+                tripsO = copy.deepcopy(trips)
+                l = len(trips)
+            else :
+                trips = copy.deepcopy(trips0)
+                idx += 1
+
+    def r1i1(self, trip, x):
+        tripi = trip[:]
+        tx = self.requests[x - 1][0]
+        tnx = self.requests[x - 1][2]
+
+        idx = 0
+        while idx < len(tripi): # insert 'x' to trip
+            r = tripi[idx]
+            t = self.requests[abs(r) - 1][(abs(r) - r) // abs(r)]
+            if t > tx:
+                tripi = tripi[:idx] + [x] + tripi[idx:]
+                break
+            idx += 1
+        if idx == len(tripi):
+            tripi = tripi[:] + [x]
+
+        idx = len(tripi)-1
+        while idx > -1: # insert '-x' to trip
+            r = tripi[(len(tripi)-1)-idx]
+            t = self.requests[abs(r) - 1][(abs(r) - r) // abs(r)]
+            if tnx > t:
+                tripi = tripi[:idx] + [-x] + tripi[idx:]
+                break
+            idx -= 1
+        # add selected request to trip1
+
+        if self.ableS(tripi)[0]:
+            return tripi
+        else : return trip
