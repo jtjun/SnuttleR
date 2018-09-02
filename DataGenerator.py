@@ -269,22 +269,25 @@ class DataGenerator:
         tx = self.requests[x - 1][0]
         tnx = self.requests[x - 1][2]
 
-        idx = 0  # insert 'x' to trip
-        while idx < len(tripi):
+        idx = 0
+        while idx < len(tripi): # insert 'x' to trip
             r = tripi[idx]
             t = self.requests[abs(r) - 1][(abs(r) - r) // abs(r)]
             if t > tx:
                 tripi = tripi[:idx] + [x] + tripi[idx:]
                 break
             idx += 1
-        idx = 0  # insert '-x' to trip
-        while idx < len(tripi):
+        if idx == len(tripi):
+            tripi = tripi[:] + [x]
+
+        idx = len(tripi)-1
+        while idx > -1: # insert '-x' to trip
             r = tripi[(len(tripi)-1)-idx]
             t = self.requests[abs(r) - 1][(abs(r) - r) // abs(r)]
             if tnx > t:
                 tripi = tripi[:idx] + [-x] + tripi[idx:]
                 break
-            idx += 1
+            idx -= 1
         # add selected request to trip1
 
         shuttlei = Shuttle(shuttle.loc, tripi, shuttle.before, shuttle.t)
@@ -341,7 +344,6 @@ class DataGenerator:
                             schedule.rejects.remove(r)
                     elif r not in schedule.rejects :
                         schedule.rejects.append(r)
-                        # print('Temporary reject the request {}'.format(i))
 
         # optimize
         self.optimize(routes)
@@ -365,7 +367,6 @@ class DataGenerator:
             jSlack = []
             if r < 0 : continue
             j, l = 0, len(routes)
-            random.shuffle(routes)
             while j < l :
                 shuttle = routes[j]
                 route = shuttle.trip
@@ -381,7 +382,6 @@ class DataGenerator:
                     ableS = self.shuttleAbleS(nshuttle)
                     if ableS[0] :
                         jSlack.append((j, ableS[1]))
-
                 j += 1
 
             if len(jSlack) < 1:
@@ -396,7 +396,6 @@ class DataGenerator:
                             schedule.rejects.remove(r)
                     elif r not in schedule.rejects :
                         schedule.rejects.append(r)
-                        # print('Temporary reject the request {}'.format(i))
 
             else : # available, So find Maximum Slack Trip
                 jSlack.sort(key = lambda js : -js[1])
@@ -418,62 +417,52 @@ class DataGenerator:
 
     # _______________________GA_________________________
     def generateGA(self, schedule, t): # Genetic Algorithm
+        if t==0 : return self.generateLLF(schedule, t)
         already = []
-        for shuttle in schedule.shuttles :
+        for shuttle in schedule.shuttles:
             already += shuttle.trip + shuttle.before
 
         reqs = list(enumerate(self.requests[:]))
-        requests = list(filter(lambda req : ((req[0]+1) not in already) and (req[1][4] <= t), reqs))
+        requests = list(filter(lambda req: ((req[0] + 1) not in already) and (req[1][4] <= t), reqs))
         # request[0] = number of request
         # request[1] = (timeS, stationS, timeD, stationD, timeO)
 
         routes = copy.deepcopy(schedule.shuttles)
 
-        L = self.makeL(requests) # early deadline sorting
+        L = self.makeL(requests)  # early deadline sorting
         for r in L:
             jSlack = []
-            if r < 0 : continue
+            if r < 0: continue
             j, l = 0, len(routes)
-            random.shuffle(routes)
-            while j < l :
+            while j < l:
                 shuttle = routes[j]
-                route = shuttle.trip
-                mutab = True
-                for rr in route: # checking available
-                    if self.CT[abs(r)-1][abs(rr)-1] < 0:
-                        mutab = False
-                        break
-                if mutab: # Mutually available
-                    temp = route + [r, -r]
-                    tript = self.subL(self.L, temp)
+                tript = self.insert(shuttle, r)
+
+                if shuttle.trip != tript:  # insert available
                     nshuttle = Shuttle(shuttle.loc, tript, shuttle.before[:], t)
                     ableS = self.shuttleAbleS(nshuttle)
-                    if ableS[0] :
+                    if ableS[0]:
                         jSlack.append((j, ableS[1]))
-
                 j += 1
 
             if len(jSlack) < 1:
-                if len(routes) >= self.shutN :
-                    if r not in schedule.rejects :
+                if len(routes) >= self.shutN:
+                    if r not in schedule.rejects:
                         schedule.rejects.append(r)
-                else : # there are new shuttle
+                else:  # there are new shuttle
                     shuttle = Shuttle(self.depot, [r, -r], [], t)
-                    if self.shuttleAbleS(shuttle)[0] :
+                    if self.shuttleAbleS(shuttle)[0]:
                         routes.append(shuttle)
                         if r in schedule.rejects:
                             schedule.rejects.remove(r)
-                    elif r not in schedule.rejects :
+                    elif r not in schedule.rejects:
                         schedule.rejects.append(r)
-                        # print('Temporary reject the request {}'.format(i))
 
-            else : # available, So find Maximum Slack Trip
-                jSlack.sort(key = lambda js : -js[1])
+            else:  # available, So find Maximum Slack Trip
+                jSlack.sort(key=lambda js: -js[1])
                 j = jSlack[0][0]
                 shuttle = routes[j]
-                route = shuttle.trip
-                temp = route + [r, -r]
-                tript = self.subL(self.L, temp)
+                tript = self.insert(shuttle, r)
 
                 nshuttle = Shuttle(shuttle.loc, tript, shuttle.before[:], t)
                 routes[j] = nshuttle
@@ -484,3 +473,85 @@ class DataGenerator:
         # optimize
         self.optimize(routes)
         return Schedule(routes, schedule.rejects)
+
+
+    def insert(self, shuttle, x):
+        tripi = shuttle.trip[:]
+        tx = self.requests[x - 1][0]
+        tnx = self.requests[x - 1][2]
+
+        idx = 0
+        while idx < len(tripi): # insert 'x' to trip
+            r = tripi[idx]
+            t = self.requests[abs(r) - 1][(abs(r) - r) // abs(r)]
+            if t > tx:
+                tripi = tripi[:idx] + [x] + tripi[idx:]
+                break
+            idx += 1
+        if idx == len(tripi) :
+            tripi = tripi[:] + [x]
+
+        idx = len(tripi) - 1
+        while idx > -1: # insert '-x' to trip
+            r = tripi[(len(tripi)-1)-idx]
+            t = self.requests[abs(r) - 1][(abs(r) - r) // abs(r)]
+            if tnx > t:
+                tripi = tripi[:idx] + [-x] + tripi[idx:]
+                break
+            idx -= 1
+        # add selected request to trip1
+
+        shuttlei = Shuttle(shuttle.loc, tripi, shuttle.before, shuttle.t)
+        if self.shuttleAbleS(shuttlei)[0]:
+            return tripi
+        else : return shuttle.trip
+
+    def insertMS(self, shuttle, x, t):
+        tripi = shuttle.trip[:]
+        tx = self.requests[x - 1][0]
+        tnx = self.requests[x - 1][2]
+        xable = []
+        nxable =[]
+
+        idx = 0
+        while idx < len(tripi): # insert 'x' to trip
+            r = tripi[idx]
+            t = self.requests[abs(r) - 1][(abs(r) - r) // abs(r)]
+            if t > tx:
+                xable.append(idx)
+            idx += 1
+        if len(xable) < 1 :
+            xable.append(len(tripi))
+
+        idx = len(tripi) - 1
+        while idx > -1: # insert '-x' to trip
+            r = tripi[(len(tripi)-1)-idx]
+            t = self.requests[abs(r) - 1][(abs(r) - r) // abs(r)]
+            if tnx > t:
+                nxable.append(idx)
+            idx -= 1
+
+        # add selected request to trip1
+        position = []
+        if len(nxable) < 1:
+            nxable.append(len(tripi)+1)
+        else :
+            for xidx in xable :
+                for nxidx in nxable:
+                    if nxidx < xidx : continue
+
+                    temp = tripi[:xidx] + [x] + tripi[xidx:nxidx] + [-x] + tripi[nxidx:]
+                    nshuttle = Shuttle(shuttle.loc, temp, shuttle.before[:], t)
+                    ableS = self.shuttleAbleS(nshuttle)
+
+                    if ableS[0] : # available trip
+                        position.append(((xidx, nxidx), ableS[1]))
+            position.sort(key = lambda ps : -ps[1])
+            pos = position[0][0]
+                                    
+
+
+        shuttlei = Shuttle(shuttle.loc, tripi, shuttle.before, shuttle.t)
+        if self.shuttleAbleS(shuttlei)[0]:
+            return tripi
+        else : return shuttle.trip

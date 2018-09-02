@@ -141,10 +141,10 @@ class Simulator:
         for shuttle in schedule.shuttles :
             left += shuttle.trip
 
-        print(serviced)
-        print(non)
-        print(left)
-        print(self.late)
+        print('{} serviced'.format(serviced))
+        print('{} non'.format(non))
+        print('{} left'.format(left))
+        print('{} late'.format(self.late))
 
         print('shutN {} / serv {} |non {} |left {} |late {}'.format(len(schedule.shuttles), len(serviced), len(non), len(left), len(self.late)))
         print('Reject')
@@ -175,4 +175,5 @@ if __name__ == "__main__":
         St = copy.deepcopy(S)
         St.__main__(i, 'EDF')
         St.__main__(i, 'LLF')
-        St.GA(St.MG, St.RG, St.DGGA)
+        St.__main__(i, 'GA')
+        #St.GA(St.MG, St.RG, St.DGGA)
