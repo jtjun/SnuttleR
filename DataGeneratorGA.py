@@ -369,7 +369,7 @@ class DataGeneratorGA:
                     return [False, 0]
                 else : # shuttle not late / don't care
                     slack += (destTime - t)
-        return [True, slack]
+        return [True, slack/t]
 
     def optimize(self, trips0):
         trips = copy.deepcopy(trips0)

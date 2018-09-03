@@ -164,6 +164,7 @@ class DataGenerator:
         loc = shuttle.loc
         trip = shuttle.trip[:]
         t = shuttle.t + 0
+        t0 = t
 
         for i in range(len(trip)) :
             dest = trip[i]
@@ -188,32 +189,7 @@ class DataGenerator:
                     return [False, 0]
                 else : # shuttle not late / don't care
                     slack += (destTime - t)
-        return [True, slack]
-
-    def getCost(self, schedule):
-        COST_SHUTTLE = 1000
-        cost = COST_SHUTTLE * len(schedule.shuttles)
-        INF = 10000000
-        if not self.serviceAble(schedule):
-            return INF
-
-        for shuttle in schedule.shuttles:
-            trip = shuttle.troip
-            l = len(trip)
-            for i in range(l - 1):
-                if trip[i] > 0:
-                    staS = self.requests[trip[i] - 1][1]
-                else:
-                    staS = self.requests[-trip[i] - 1][3]
-
-                if trip[i + 1] > 0:
-                    staD = self.requests[trip[i + 1] - 1][1]
-                else:
-                    staD = self.requests[-trip[i + 1] - 1][3]
-
-                cost += self.dists[staS][staD]
-            cost += self.distdepot[self.requests[trip[0] - 1][1]] + self.distdepot[self.requests[-trip[-1] - 1][3]]
-        return cost
+        return [True, slack/(t-t0)]
 
     def makeL(self, requests):
         L = []
@@ -477,7 +453,7 @@ class DataGenerator:
         self.optimize(routes)
         return Schedule(routes, schedule.rejects)
 
-    def insert(self, shuttle, x, shutT):
+    def insert0(self, shuttle, x, shutT):
         tripi = shuttle.trip[:]
         tx = self.requests[x - 1][0]
         tnx = self.requests[x - 1][2]
@@ -508,6 +484,26 @@ class DataGenerator:
         position = []
         for xidx in xable :
             for nxidx in nxable:
+                if nxidx < xidx : continue
+
+                temp = tripi[:xidx] + [x] + tripi[xidx:nxidx] + [-x] + tripi[nxidx:]
+                nshuttle = Shuttle(shuttle.loc, temp, shuttle.before[:], shutT)
+                ableS = self.shuttleAbleS(nshuttle)
+                if ableS[0] : # available trip
+                    position.append((temp[:], ableS[1]))
+
+        if len(position) < 1 :
+            return shuttle.trip
+
+        position.sort(key = lambda ps : -ps[1])
+        return position[0][0]
+
+    def insert(self, shuttle, x, shutT):
+        tripi = shuttle.trip[:]
+
+        position = []
+        for xidx in range(len(tripi)) :
+            for nxidx in range(len(tripi)):
                 if nxidx < xidx : continue
 
                 temp = tripi[:xidx] + [x] + tripi[xidx:nxidx] + [-x] + tripi[nxidx:]
