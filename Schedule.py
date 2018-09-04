@@ -81,9 +81,9 @@ class Schedule:
     def crossover(self, other):
         # only when t = 0 : there are no servicing process
         # shut.loc = depot | shut.before = [] | *rejects is not empty*
-        reqs = [] + self.rejects # whole reqs which in schedule
+        reqs = self.rejects[:] # whole reqs which in schedule
         for shut in self.shuttles:
-            reqs += shut.trip
+            reqs += (shut.before+shut.trip)
 
         shuts1 = copy.deepcopy(self.shuttles)
         shuts2 = copy.deepcopy(other.shuttles)
@@ -95,7 +95,7 @@ class Schedule:
             contained += (shut.before + shut.trip)
 
         for shut in shuts2:
-            ntrip = list(filter(lambda r: r not in contained, shut.trip))
+            ntrip = list(filter(lambda r : r not in contained, shut.trip))
             if len(ntrip) > 0:
                 nshut = Shuttle(shut.loc, ntrip, [], 0)
                 retshuts.append(nshut)

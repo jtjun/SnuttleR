@@ -107,15 +107,28 @@ class DataGenerator:
                     return [False, 0]
                 else : # shuttle not late / don't care
                     slack += (destTime - t)
+
+        if t == t0 : t0 -= 1
         return [True, slack/(t-t0)]
 
     def getCost(self, schedule):
         totSlack = self.n
+        reqs = schedule.rejects[:]
         for shuttle in schedule.shuttles :
+            travle = (shuttle.before + shuttle.trip)
+            for r in travle :
+                ar = abs(r)
+                if travle.index(ar) >= travle.index(-ar):
+                    return 2.0 * self.n
+            reqs += travle
+
             ableS = self.shuttleAbleS(shuttle)
             if not ableS[0] :
                 return 2.0*self.n
             totSlack += ableS[1]
+
+        for r in reqs :
+            if reqs.count(r) != 1 : return 2.0*self.n + 0.01*abs(r)
 
         return len(schedule.rejects) + self.n/totSlack
 
@@ -157,6 +170,8 @@ class DataGenerator:
                         continue # insert is failed
                     else :
                         shuttles[jdx].trip = copy.deepcopy(ntrip)
+                        shuttle.trip.remove(r)
+                        shuttle.trip.remove(-r)
                         mark += [r, -r]
                         break
 
@@ -356,14 +371,12 @@ class DataGenerator:
 
         # optimize
         if opt :
-            re = self.optimize(routes, t)
-            while re : re = self.optimize(routes, t)
+            self.optimize(routes, t)
             for r in schedule.rejects:
                 for i in range(len(routes)):
                     k = self.mergeTrips(routes[i].trip, [r, -r])
                     if k != None:
                         routes[i].trip = k[:]
-                        schedule.rejects.remove(r)
                         break
         return Schedule(routes, schedule.rejects)
 
@@ -427,14 +440,12 @@ class DataGenerator:
 
         # optimize
         if opt :
-            re = self.optimize(routes, t)
-            while re : re = self.optimize(routes, t)
+            self.optimize(routes, t)
             for r in schedule.rejects:
                 for i in range(len(routes)):
                     k = self.mergeTrips(routes[i].trip, [r, -r])
                     if k != None:
                         routes[i].trip = k[:]
-                        schedule.rejects.remove(r)
                         break
         return Schedule(routes, schedule.rejects)
 
@@ -447,7 +458,7 @@ class DataGenerator:
         # GA operating is already done, respect previous schedule
         already = []
         for shuttle in schedule.shuttles:
-            already += shuttle.trip + shuttle.before
+            already += (shuttle.trip + shuttle.before)
 
         reqs = list(enumerate(self.requests[:]))
         requests = list(filter(lambda req: ((req[0] + 1) not in already) and (req[1][4] <= t), reqs))
@@ -500,14 +511,12 @@ class DataGenerator:
 
         # optimize
         if opt :
-            re = self.optimize(routes, t)
-            while re : re = self.optimize(routes, t)
+            self.optimize(routes, t)
             for r in schedule.rejects:
                 for i in range(len(routes)):
                     k = self.mergeTrips(routes[i].trip, [r, -r])
                     if k != None:
                         routes[i].trip = k[:]
-                        schedule.rejects.remove(r)
                         break
         return Schedule(routes, schedule.rejects)
 
@@ -556,22 +565,29 @@ class DataGenerator:
                         genes[j].mutation(i1, i2)
 
                 # Optimization
-                for j in range(Ngene):
-                    if self.getCost(genes[j]) < INF:
-                        genes[j] = self.optimizeGA(genes[j])
+                for j in range(Sgene, Ngene):
+                    self.optimize(genes[j].shuttles, 0)
+
+                    for r in genes[j].rejects:
+                        for idx in range(len(genes[j].shuttles)):
+                            k = self.mergeTrips(genes[j].shuttles[idx].trip, [r, -r])
+                            if k != None:
+                                genes[j].shuttles[idx].trip = k[:]
+                                break
 
                 genes.sort(key=lambda gene: self.getCost(gene))
-
                 for j in range(Ngene - 1, 3, -1):
                     if genes[j] == genes[j - 4]:
                         if len(genes) <= Sgene:
                             break
                         del genes[j]
+
                 costs.append(self.getCost(genes[0]))
                 if (costs[i] > costs[i + 1]):
-                    print("{}% improved | {}".format((1 - (costs[i + 1] / costs[i])) * 100,
-                                                     len(genes[0].rejects)))
+                    print("{}% improved | {}".format((1 - (costs[i + 1] / costs[i])) * 100, len(genes[0].rejects)))
                 if costs[i+1] >= INF :
+                    for i in range(Sgene) :
+                        genes[i] = self.generateEDF(dumy, 0)
                     genes[0] = copy.deepcopy(best)
                     print('Detact : GA ERROR -> fix state')
 
@@ -603,24 +619,3 @@ class DataGenerator:
             else:
                 t -= self.ST[requestidx][i]
         return self.n - 1
-
-    def optimizeGA(self, schedule):
-        rejects = schedule.rejects
-        shuts = copy.deepcopy(schedule.shuttles)
-
-        for i in range(len(shuts)-1, -1, -1):
-            for j in range(i):
-                k = self.mergeTrips(shuts[j].trip, shuts[i].trip)
-                if k != None:
-                    shuts[j].trip = k[:]
-                    del shuts[i]
-                    break
-        for r in rejects:
-            for i in range(len(shuts)):
-                k = self.mergeTrips(shuts[i].trip, [r, -r])
-                if k != None:
-                    shuts[i].trip = k[:]
-                    rejects.remove(r)
-                    break
-
-        return Schedule(shuts, rejects)

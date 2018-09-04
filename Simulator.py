@@ -135,6 +135,9 @@ class Simulator:
         print(len(schedule.shuttles))
         for shuttle in schedule.shuttles :
             print(shuttle.before, shuttle.trip, self.DG.checkAble(shuttle))
+        if self.DG.getCost(schedule) >= 2.0*self.n :
+            print('ERROR : Duplicate {}'.format(self.DG.getCost(schedule)))
+            return 0
         print('_____________________\n')
 
         serviced = schedule.getServiced(self.n)
@@ -171,6 +174,7 @@ if __name__ == "__main__":
     off = False
     opt = True
     S = Simulator(MapType='clust', ReqType='CS2')
+    if opt : print('opt is running')
     for i in range(n) :
         simul(S, i, 'EDF', off, opt)
         #simul(S, i, 'EDF', True, opt)
