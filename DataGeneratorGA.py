@@ -82,12 +82,6 @@ class DataGeneratorGA:
         
         for i in range(self.Reqs.reqN):
             i += 1
-            # if i not in tripSet :
-            #     print("there are no %d in trips" %i)
-            #     return False
-            # if -i not in tripSet :
-            #     print("there are no %d in trips" % -i)
-            #     return False
             if tripSet.count(i) > 1 :
                 print("there are more %d s in trips" % i)
                 return False
@@ -124,7 +118,7 @@ class DataGeneratorGA:
 
     def getCost(self, chromo):
         if not self.chromoAble(chromo):
-            return 2.0
+            return 2.0*chromo.reqN
 
         sk = chromo.reqN
         for trip in chromo.trips:
@@ -152,7 +146,8 @@ class DataGeneratorGA:
                         sk += (ts[i+1] - at) / self.Reqs.T
                         ats.append(ts[i+1])
                     else: ats.append(at)
-        return len(chromo.rejects)/chromo.reqN + 1/sk
+
+        return len(chromo.rejects) + chromo.reqN/sk
 
     def generateCFSS(self):
         requests = list(enumerate(self.Reqs.requests[:]))
