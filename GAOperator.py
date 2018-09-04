@@ -44,6 +44,7 @@ class GAOperator:
             print("initial is shit!")
 
         else :
+            print('{} : initial'.format(len(self.genes[0].rejects)))
             for i in range(Nstep):
 
                 print("step {idx} is running".format(idx = i+1))
@@ -80,7 +81,7 @@ class GAOperator:
                         del self.genes[j]
                 self.costs.append(DG.getCost(self.genes[0]))
                 if(self.costs[i] > self.costs[i+1]) :
-                    print("{}% improved".format((1-(self.costs[i+1]/self.costs[i]))*100))
+                    print("{}% improved | {}".format((1-(self.costs[i+1]/self.costs[i]))*100, len(self.genes[0].rejects)))
                     # norm = (0.7078 * math.sqrt(2 * (DG.Reqs.reqN + len(self.genes[0].trips))) + 0.551) * 100
                     # if(self.costs[i+1] <= norm) :
                     #     print("reach lower bound of tsp {}".format(norm))
