@@ -3,12 +3,10 @@
   <component name="ChangeListManager">
     <list default="true" id="1e469ce9-2a24-4ed2-8555-66e9cadb6a8e" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Chromosome.py" beforeDir="false" afterPath="$PROJECT_DIR$/Chromosome.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/GAOperator.py" beforeDir="false" afterPath="$PROJECT_DIR$/GAOperator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/result/stations.png" beforeDir="false" afterPath="$PROJECT_DIR$/result/stations.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/result/test EDF 0 Whole Trips.png" beforeDir="false" afterPath="$PROJECT_DIR$/result/test EDF 0 Whole Trips.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/result/test EDF off 0 Whole Trips.png" beforeDir="false" afterPath="$PROJECT_DIR$/result/test EDF off 0 Whole Trips.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/result/test LLF 0 Whole Trips.png" beforeDir="false" afterPath="$PROJECT_DIR$/result/test LLF 0 Whole Trips.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/result/test LLF off 0 Whole Trips.png" beforeDir="false" afterPath="$PROJECT_DIR$/result/test LLF off 0 Whole Trips.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/result/final Whole Trips.png" beforeDir="false" afterPath="$PROJECT_DIR$/result/final Whole Trips.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/result/init Whole Trips.png" beforeDir="false" afterPath="$PROJECT_DIR$/result/init Whole Trips.png" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -18,15 +16,15 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/SnuttleR$Simulator.coverage" NAME="Simulator Coverage Results" MODIFIED="1536024337449" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/SnuttleR$Simulator.coverage" NAME="Simulator Coverage Results" MODIFIED="1536034996385" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file leaf-file-name="Simulator.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Simulator.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1">
-              <caret line="112" column="33" lean-forward="true" selection-start-line="112" selection-start-column="33" selection-end-line="112" selection-end-column="33" />
+            <state relative-caret-position="15">
+              <caret line="112" column="33" selection-start-line="112" selection-start-column="33" selection-end-line="112" selection-end-column="33" />
               <folding>
                 <element signature="e#0#37#0" expanded="true" />
               </folding>
@@ -37,7 +35,7 @@
       <file leaf-file-name="DataGenerator.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/DataGenerator.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="6180">
+            <state relative-caret-position="592">
               <caret line="416" column="35" selection-start-line="416" selection-start-column="35" selection-end-line="416" selection-end-column="35" />
               <folding>
                 <element signature="e#0#29#0" expanded="true" />
@@ -46,10 +44,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="DataGeneratorGA.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="DataGeneratorGA.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/DataGeneratorGA.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="4373">
+            <state relative-caret-position="-458">
               <caret line="366" column="38" selection-start-line="366" selection-start-column="38" selection-end-line="366" selection-end-column="38" />
               <folding>
                 <element signature="e#0#33#0" expanded="true" />
@@ -58,11 +56,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="GAOperator.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="GAOperator.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/GAOperator.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="153">
-              <caret line="46" column="68" selection-start-line="46" selection-start-column="68" selection-end-line="46" selection-end-column="68" />
+            <state relative-caret-position="193">
+              <caret line="78" column="53" lean-forward="true" selection-start-line="78" selection-start-column="53" selection-end-line="78" selection-end-column="53" />
             </state>
           </provider>
         </entry>
@@ -70,7 +68,9 @@
       <file leaf-file-name="Chromosome.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Chromosome.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-103" />
+            <state relative-caret-position="-203">
+              <caret line="15" column="26" selection-start-line="15" selection-start-column="26" selection-end-line="15" selection-end-column="26" />
+            </state>
           </provider>
         </entry>
       </file>
@@ -102,7 +102,6 @@
       <list>
         <option value="$PROJECT_DIR$/TickingOperator.py" />
         <option value="$PROJECT_DIR$/Shuttles.py" />
-        <option value="$PROJECT_DIR$/Chromosome.py" />
         <option value="$PROJECT_DIR$/MapGenerator.py" />
         <option value="$PROJECT_DIR$/Schedule.py" />
         <option value="$PROJECT_DIR$/Shuttle.py" />
@@ -112,6 +111,7 @@
         <option value="$PROJECT_DIR$/Simulator.py" />
         <option value="$PROJECT_DIR$/DataGenerator.py" />
         <option value="$PROJECT_DIR$/GAOperator.py" />
+        <option value="$PROJECT_DIR$/Chromosome.py" />
       </list>
     </option>
   </component>
@@ -133,7 +133,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -150,6 +149,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -444,9 +444,23 @@
     <entry file="file://$PROJECT_DIR$/result/final Whole Trips.png">
       <provider selected="true" editor-type-id="images" />
     </entry>
+    <entry file="file://$PROJECT_DIR$/GAOperator.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="193">
+          <caret line="78" column="53" lean-forward="true" selection-start-line="78" selection-start-column="53" selection-end-line="78" selection-end-column="53" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Chromosome.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-203">
+          <caret line="15" column="26" selection-start-line="15" selection-start-column="26" selection-end-line="15" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/DataGenerator.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="6180">
+        <state relative-caret-position="592">
           <caret line="416" column="35" selection-start-line="416" selection-start-column="35" selection-end-line="416" selection-end-column="35" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
@@ -456,8 +470,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Simulator.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1">
-          <caret line="112" column="33" lean-forward="true" selection-start-line="112" selection-start-column="33" selection-end-line="112" selection-end-column="33" />
+        <state relative-caret-position="15">
+          <caret line="112" column="33" selection-start-line="112" selection-start-column="33" selection-end-line="112" selection-end-column="33" />
           <folding>
             <element signature="e#0#37#0" expanded="true" />
           </folding>
@@ -466,23 +480,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/DataGeneratorGA.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4373">
+        <state relative-caret-position="-458">
           <caret line="366" column="38" selection-start-line="366" selection-start-column="38" selection-end-line="366" selection-end-column="38" />
           <folding>
             <element signature="e#0#33#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Chromosome.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-103" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/GAOperator.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="153">
-          <caret line="46" column="68" selection-start-line="46" selection-start-column="68" selection-end-line="46" selection-end-column="68" />
         </state>
       </provider>
     </entry>

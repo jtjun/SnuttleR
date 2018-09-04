@@ -13,6 +13,7 @@ class Chromosome:
         self.trips.sort(key = lambda trip: len(trip))
 
         self.rejects = list(filter(lambda r: not any(r in trip for trip in self.trips), range(1, self.reqN+1)))
+        self.rejects.sort()
 
     def __str__(self):
         ret = "--------------------"
