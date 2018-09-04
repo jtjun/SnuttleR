@@ -109,6 +109,7 @@ class Simulator:
         # time ticking is done
         self.late = late
         self.report(schedule, typ+' '+str(numm))
+        return len(schedule.rejects)
 
     def haveToGo(self, shuttle) :
         ntrip = []
@@ -161,12 +162,12 @@ class Simulator:
         V.drawTrips(self.MG, self.RG, schedule, 'test '+str(numm))
         print('_____________________\n')
 
-    def GA(self, MAP, Reqs, DG, ns = 10):
+    def GA(self, MAP, Reqs, DG, normR, ns = 10):
         Vi = Visualization()
         V = Visualization()
         V.drawPoints([coord[0] for coord in MAP.stations], [coord[1] for coord in MAP.stations], 'result/stations', 'ro')
 
-        GAOP = GAOperator(DG, 'LLF', ns)
+        GAOP = GAOperator(DG, 'LLF', normR, ns)
 
         V.drawPoints(range(len(GAOP.costs)), GAOP.costs, 'costs for each generation', 'r-')
 
@@ -182,5 +183,5 @@ if __name__ == "__main__":
         St.__main__(i, 'EDF', off)
         St.__main__(i, 'EDF', True)
         St.__main__(i, 'LLF', off)
-        St.__main__(i, 'LLF', True)
-        St.GA(St.MG, St.RG, St.DGGA, 10)
+        normR = St.__main__(i, 'LLF', True)
+        St.GA(St.MG, St.RG, St.DGGA, (normR//2), 10)

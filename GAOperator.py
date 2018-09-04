@@ -6,9 +6,10 @@ import copy
 
 class GAOperator:
     
-    def __init__(self, DG, initial, ns = 25):
+    def __init__(self, DG, initial, normR, ns = 25):
         self.genes = []
         self.costs = []
+        self.normR = normR
 
         Ngene = 1000 # the number of genes
         Nggene = 20 # the number of genes which can survive
@@ -82,10 +83,11 @@ class GAOperator:
                 self.costs.append(DG.getCost(self.genes[0]))
                 if(self.costs[i] > self.costs[i+1]) :
                     print("{}% improved | {}".format((1-(self.costs[i+1]/self.costs[i]))*100, len(self.genes[0].rejects)))
-                    # norm = (0.7078 * math.sqrt(2 * (DG.Reqs.reqN + len(self.genes[0].trips))) + 0.551) * 100
-                    # if(self.costs[i+1] <= norm) :
-                    #     print("reach lower bound of tsp {}".format(norm))
-                    #     break
+
+                    # when better than the half of offline LLF result, stop generating
+                if(len(self.genes[0].rejects) <= self.normR) :
+                    print("better than (offline LLF)/2 {}".format(len(self.genes[0].rejects)))
+                    break
 
         print("\nresults.....")
         for i in range(len(self.costs)):
