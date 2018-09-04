@@ -3,25 +3,24 @@ from RequestGenerator import RequestGenerator
 from DataGenerator import DataGenerator
 from Schedule import Schedule
 from Visualization import Visualization
-from DataGeneratorGA import DataGeneratorGA
-from GAOperator import GAOperator
 from Shuttle import Shuttle
 import random
 import copy
 
-
 class Simulator:
     # as time goes by simulate situation
-    def __init__(self, m = 20, n = 100, T = 1000, MapType = 'nomal', ReqType = 'AR', shutN = 10):
+    def __init__(self, m = 20, n = 100, T = 1000, shutN = 10, onP = 0.5, \
+                 MapType = 'nomal', ReqType = 'AR', gaN = 10):
         self.m = m  # number of stations
         self.n = n  # number of requests
         self.shutN = shutN  # number of shuttles
         self.T = T  # running time
+        self.onP = onP
+        self.gaN = gaN
 
         self.MG = MapGenerator(self.m, MapType)
-        self.RG = RequestGenerator(self.MG, ReqType, self.n, self.T)
-        self.DG = DataGenerator(self.MG, self.RG, shutN)
-        self.DGGA = DataGeneratorGA(self.MG, self.RG, self.shutN)
+        self.RG = RequestGenerator(self.MG, ReqType, self.n, self.T, onP)
+        self.DG = DataGenerator(self.MG, self.RG, shutN, gaN)
         self.requests = self.RG.requests[:]
 
         print(self.MG)
@@ -32,24 +31,25 @@ class Simulator:
         ret = ""
         return ret
 
-    def __main__(self, numm, typ, off): # when call the main, new schedule is generated
+    def __main__(self, numm, typ, off, opt): # when call the main, new schedule is generated
         requests = self.requests[:]
         schedule = Schedule([])
+        late = []
+        self.late = late
 
         if off :
-            if typ == 'EDF' : schedule = self.DG.generateEDF(schedule, 0, True)
-            if typ == 'LLF' : schedule = self.DG.generateLLF(schedule, 0, True)
-            if typ == 'GA' : schedule = self.DG.generateGA(schedule, 0, True)
+            if typ == 'EDF' : schedule = self.DG.generateEDF(schedule, 0, True, opt)
+            if typ == 'LLF' : schedule = self.DG.generateLLF(schedule, 0, True, opt)
+            if typ == 'GA' : schedule = self.DG.generateGA(schedule, 0, True, opt)
             self.report(schedule, typ + ' off ' + str(numm))
-            return 0
+            return len(schedule.rejects)
 
         # initialize schedule
         requestsT = list(filter(lambda r: r[4] < 0, requests))
-        if typ == 'EDF' : schedule = self.DG.generateEDF(schedule, 0)
-        if typ == 'LLF' : schedule = self.DG.generateLLF(schedule, 0)
-        if typ == 'GA' : schedule = self.DG.generateGA(schedule, 0)
+        if typ == 'EDF' : schedule = self.DG.generateEDF(schedule, 0, opt)
+        if typ == 'LLF' : schedule = self.DG.generateLLF(schedule, 0, opt)
+        if typ == 'GA' : schedule = self.DG.generateGA(schedule, 0, opt)
 
-        late = []
         # time is ticking
         for t in range(1, self.T) :
             # print('{t}\n{s}\n___________________\n'.format(t=t, s=schedule))
@@ -102,9 +102,9 @@ class Simulator:
                     shuttle.trip = self.haveToGo(shuttle)[:]
                     # now all shuttles has only 'have to go'
 
-            if typ == 'EDF': schedule = self.DG.generateEDF(schedule, t)
-            if typ == 'LLF': schedule = self.DG.generateLLF(schedule, t)
-            if typ == 'GA' : schedule = self.DG.generateGA(schedule, t)
+            if typ == 'EDF': schedule = self.DG.generateEDF(schedule, t, opt)
+            if typ == 'LLF': schedule = self.DG.generateLLF(schedule, t, opt)
+            if typ == 'GA' : schedule = self.DG.generateGA(schedule, t, opt)
 
         # time ticking is done
         self.late = late
@@ -162,26 +162,18 @@ class Simulator:
         V.drawTrips(self.MG, self.RG, schedule, 'test '+str(numm))
         print('_____________________\n')
 
-    def GA(self, MAP, Reqs, DG, normR, ns = 10):
-        Vi = Visualization()
-        V = Visualization()
-        V.drawPoints([coord[0] for coord in MAP.stations], [coord[1] for coord in MAP.stations], 'result/stations', 'ro')
-
-        GAOP = GAOperator(DG, 'LLF', normR, ns)
-
-        V.drawPoints(range(len(GAOP.costs)), GAOP.costs, 'costs for each generation', 'r-')
-
-        Vi.drawTripsGA(MAP, Reqs, GAOP.init, 'result/init')
-        V.drawTripsGA(MAP, Reqs, GAOP.genes[0], 'result/final')
+def simul(Simulator, number, typ, off, opt):
+    S = copy.deepcopy(Simulator)
+    return S.__main__(number, typ, off, opt)
 
 if __name__ == "__main__":
     n = 1
-    off=False
+    off = False
+    opt = True
     S = Simulator(MapType='clust', ReqType='CS2')
     for i in range(n) :
-        St = copy.deepcopy(S)
-        St.__main__(i, 'EDF', off)
-        St.__main__(i, 'EDF', True)
-        St.__main__(i, 'LLF', off)
-        normR = St.__main__(i, 'LLF', True)
-        St.GA(St.MG, St.RG, St.DGGA, (normR//2), 10)
+        simul(S, i, 'EDF', off, opt)
+        #simul(S, i, 'EDF', True, opt)
+        simul(S, i, 'LLF', off, opt)
+        #simul(S, i, 'LLF', True)
+        simul(S, i, 'GA', off, opt)

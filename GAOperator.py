@@ -84,9 +84,9 @@ class GAOperator:
                 if(self.costs[i] > self.costs[i+1]) :
                     print("{}% improved | {}".format((1-(self.costs[i+1]/self.costs[i]))*100, len(self.genes[0].rejects)))
 
-                    # when better than the half of offline LLF result, stop generating
+                    # when better than the norm, stop generating
                 if(len(self.genes[0].rejects) <= self.normR) :
-                    print("better than (offline LLF)/2 {}".format(len(self.genes[0].rejects)))
+                    print("better than norm".format(len(self.genes[0].rejects)))
                     break
 
         print("\nresults.....")

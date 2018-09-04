@@ -1,5 +1,6 @@
 import random
 import math
+import copy
 
 tdis = 145
 class RequestGenerator() :
@@ -8,9 +9,10 @@ class RequestGenerator() :
     # request[4] = timeO := Time that request is occur < timeS
     # n : the number of requests
     # T : the maximum time of the simulation
-    def __init__(self, MG, typ = 'AR', n = 1000, T = 1440):
+    def __init__(self, MG, typ = 'AR', n = 100, T = 1440, onP = 0.5):
         self.n = n
         self.T = T
+        self.offRN = n-((onP*n)//1)
 
         self.Map = MG
         self.m = MG.m
@@ -32,6 +34,8 @@ class RequestGenerator() :
             self.requests = self.cluster2(0.8)
         else :
             print("ERROR : Requests Type Unavailable")
+
+        self.ST = self.similarTable()
         pass
 
     def __str__(self):
@@ -43,23 +47,30 @@ class RequestGenerator() :
 
     def rand(self):
         lst = []
+        offR = 0
         for i in range(self.n):
-            # new version without using loop
-            sta0 = random.randrange(self.m)
-            sta1 = (sta0 + random.randrange(1, self.m)) % self.m
-            # change index 1~m to 0~m-1 for easy access of dist[][]
+            req = self.makeReq()
+            if req[4] == 0 :
+                offR += 1
+            lst.append(req)
+        return self.ensureOFF(lst, offR)
 
-            d = self.dists[sta0][sta1] * (1 + random.random())
-            # make time interval random value between distance and 2*distance
-            t0 = random.randrange(math.floor(self.T - d))
-            t1 = int(math.floor(t0 + d))
+    def makeReq(self):
+        sta0 = random.randrange(self.m)
+        sta1 = (sta0 + random.randrange(1, self.m)) % self.m
+        # change index 1~m to 0~m-1 for easy access of dist[][]
 
-            td = t0 - tdis
-            if td <= 0: tO = 0
-            else : tO = random.randrange(0, td)
-            lst.append((t0, sta0, t1, sta1, tO))
-            # To ensure two stations, times are different
-        return lst
+        d = self.dists[sta0][sta1] * (1 + random.random())
+        # make time interval random value between distance and 2*distance
+        t0 = random.randrange(math.floor(self.T - d))
+        t1 = int(math.floor(t0 + d))
+        # To ensure two stations, times are different
+
+        td = t0 - tdis
+        if td <= 0: tO = 0
+        else : tO = random.randrange(0, td)
+
+        return (t0, sta0, t1, sta1, tO)
 
     def camel(self):
         t1, t2 = self.T/3, 2*self.T/3
@@ -76,8 +87,8 @@ class RequestGenerator() :
 
     def cluster(self):
         lst = []
+        offR = 0 # counting offline
         for i in range(self.n//2):
-            # new version without using loop
             sta0 = random.randrange(self.m//2)
             sta1 = (sta0 + random.randrange(1, self.m//2)) % (self.m//2)
             # change index 1~m to 0~m-1 for easy access of dist[][]
@@ -88,12 +99,13 @@ class RequestGenerator() :
             t1 = int(math.floor(t0 + d))
 
             td = t0 - tdis
-            if td <= 0: tO = 0
+            if td <= 0:
+                tO = 0
+                offR += 1
             else: tO = random.randrange(0, td)
             lst.append((t0, sta0, t1, sta1, tO))
             
         for i in range(self.n//2, self.n):
-            # new version without using loop
             sta0 = random.randrange(self.m//2) + (self.m//2)
             sta1 = (sta0 + random.randrange(1, self.m//2)) % (self.m//2) + (self.m//2)
             # change index 1~m to 0~m-1 for easy access of dist[][]
@@ -104,16 +116,20 @@ class RequestGenerator() :
             t1 = int(math.floor(t0 + d))
 
             td = t0 - tdis
-            if td <= 0: tO = 0
+            if td <= 0:
+                tO = 0
+                offR += 1
             else : tO = random.randrange(0, td)
             lst.append((t0, sta0, t1, sta1, tO))
-        return lst
+        # separate map into 2 area
+        return self.ensureOFF(lst, offR)
 
     def cluster2(self, p):
         np = int(self.n*p)
         RG = RequestGenerator(self.Map, 'CS', np, self.T)
         requests1 = RG.requests
         requests2 = []
+        offR = 0
 
         for i in range(np, self.n) :
             sta0 = random.randrange(self.m // 2) + (self.m // 2)*(i%2)
@@ -126,9 +142,58 @@ class RequestGenerator() :
             t1 = int(math.floor(t0 + d))
 
             td = t0 - tdis
-            if td <= 0: tO = 0
+            if td <= 0:
+                tO = 0
+                offR += 1
             else : tO = random.randrange(0, td)
             requests2.append((t0, sta0, t1, sta1, tO))
 
-        return requests1+requests2
+        lst = requests1+requests2
+        return self.ensureOFF(lst, offR)
 
+    def ensureOFF(self, lst, offR):
+        idx = 0 # ensure offline requests number = self.offRN
+        # case : smaller number of offline
+        while offR < self.offRN :
+            req = lst[idx]
+            if req[4] != 0 :
+                lst[idx] = (req[0], req[1], req[2], req[3], 0)
+                offR +=1
+            idx += 1
+
+        # case : larger number of offline
+        while offR > self.offRN :
+            req = self.makeReq()
+            while req[4] == 0:
+                req = self.makeReq()
+            finding = True
+            while finding :
+                r = lst[idx]
+                if r[4] == 0 :
+                    r = copy.deepcopy(req)
+                    finding = False
+                idx += 1
+            offR -= 1
+
+        return lst
+
+    def similarTable(self):
+        ret = []
+        for requestidx in range(self.n):
+            rw = []
+            request = self.requests[requestidx]
+            su = 0.0
+            for request2 in self.requests:
+                dreq = (request2[0] - request[0]) ** 2 + (request2[2] - request[2]) ** 2 \
+                       + (self.Map.dists[request2[1]][request[1]]) ** 2 + (self.Map.dists[request2[3]][request[3]]) ** 2
+                if dreq > 0: su += 1 / dreq
+
+            for request2 in self.requests:
+                dreq = (request2[0] - request[0]) ** 2 + (request2[2] - request[2]) ** 2 \
+                       + (self.Map.dists[request2[1]][request[1]]) ** 2 + (self.Map.dists[request2[3]][request[3]]) ** 2
+                if dreq > 0:
+                    rw.append((1 / dreq) / su)
+                else:
+                    rw.append(0.0)
+            ret.append(rw)
+        return ret

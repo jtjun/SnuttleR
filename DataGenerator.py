@@ -1,12 +1,11 @@
 from Schedule import Schedule
 from Shuttle import Shuttle
-import math
 import random
 import copy
 
 
 class DataGenerator:
-    def __init__(self, MG, RG, shutN):
+    def __init__(self, MG, RG, shutN, gaN):
         self.MG = MG
         self.dists = MG.dists
         self.depot = MG.depot
@@ -16,11 +15,15 @@ class DataGenerator:
         self.n = len(self.requests)  # number of requests
         self.T = RG.T
         self.shutN = shutN
+        self.gaN = gaN
 
         requests = list(enumerate(self.requests))
         self.L = self.makeL(requests)
         self.CT = self.conflictTable()  # C , index = Rn -1 (start with 0)
-        # self.LT = self.leastTable()
+        self.ST = RG.ST
+
+        self.Ngene = 250
+        self.Sgene = 20
         pass
 
     def __str__(self):
@@ -42,90 +45,8 @@ class DataGenerator:
                     else: ct[i].append(-1)
         return ct
 
-    def leastTable(self):
-        INF = 1000000000
-        l = len(self.requests)
-        ct = []  # least table
-        # -1 : conflict // 0 : i == j // 1 : available
-        for i in range(l):
-            ct.append([])
-            for j in range(l):
-                if i == j:
-                    ct[i].append(0)
-                else:
-                    trips= [[i+1, -(i+1), j+1, -(j+1)], \
-                            [i+1, j+1, -(i+1), -(j+1)], \
-                            [j+1, i+1, -(i+1), -(j+1)], \
-                            [j+1, -(j+1), i+1, -(i+1)], \
-                            [j+1, i+1, -(j+1), -(i+1)], \
-                            [i+1, j+1, -(j+1), -(i+1)]]
-                    trindx = copy.deepcopy(trips)
-                    trips.sort(key = lambda trip : self.costTrip(trip))
-                    if self.costTrip(trips[0]) != INF :
-                        ct[i].append(trindx.index(trips[0])+1)
-                    else: ct[i].append(-1)
-        return ct
-
-    def costTrip(self, trip):
-        INF, l , slack = 1000000000, 0, 0
-        ts = []
-        stas = []
-        for i in trip:
-            ia = abs(i)
-            ts.append(self.requests[ia - 1][(ia - i) // ia])
-            stas.append(self.requests[ia - 1][((ia - i) // ia) + 1])
-            l += 1
-
-        ats = [ts[0]]  # arrival times
-        i = 0
-        while i < l - 1:
-            d = self.dists[stas[i]][stas[i + 1]]
-            at = ats[i] + d  # arrival time
-
-            if trip[i + 1] < 0:  # drop off
-                if ts[i + 1] < at:
-                    return INF  # arrival late so fail
-                else:
-                    ats.append(at)
-
-            if trip[i + 1] > 0:  # pick up
-                if ts[i + 1] > at:
-                    slack += ts[i+1] - at
-                    ats.append(ts[i + 1])  # arrival earlier
-                # can calculate slack time at here
-                else:
-                    ats.append(at)
-            i += 1
-
-        return ats[len(ats)-1] - ats[0] - slack
-
-    def serviceAble(self, schedule):
-        tripSet = []
-        for shuttle in schedule.shuttles:
-            if not self.shuttleAbleS(shuttle)[0]:
-                return False
-            tripSet += shuttle.trip
-
-        for i in range(len(self.requests)):
-            i = i + 1
-            if i not in tripSet:
-                print("there are no %d in trips" % i)
-                return False
-            if -i not in tripSet:
-                print("there are no %d in trips" % -i)
-                return False
-            if tripSet.count(i) != 1:
-                print("there are more %d s in trips" % i)
-                return False
-            if tripSet.count(-i) != 1:
-                print("there are more %d s in trips" % -i)
-                return False
-        return True
-
     def available(self, trip):
-        ts = []
-        stas = []
-        l = 0
+        ts, stas, l, i = [], [], 0, 0
         for i in trip:
             ia = abs(i)
             ts.append(self.requests[ia - 1][(ia - i) // ia])
@@ -133,25 +54,20 @@ class DataGenerator:
             l += 1
 
         ats = [ts[0]]  # arrival times
-        i = 0
         while i < l - 1:
             d = self.dists[stas[i]][stas[i + 1]]
             at = ats[i] + d  # arrival time
 
-            if trip[i + 1] < 0:  # drop off
-                if ts[i + 1] < at:
-                    return False  # arrival late
-                else:
-                    ats.append(at)
-
             if trip[i + 1] > 0:  # pick up
-                if ts[i + 1] > at:
-                    ats.append(ts[i + 1])  # arrival earlier
+                if ts[i + 1] > at: ats.append(ts[i + 1])  # arrival earlier
                 # can calculate slack time at here
-                else:
-                    ats.append(at)
-            i += 1
+                else: ats.append(at)
 
+            if trip[i + 1] < 0:  # drop off
+                if ts[i + 1] < at: return False  # arrival late
+                else: ats.append(at)
+
+            i += 1
         return True
 
     def checkAble(self, shuttle):
@@ -163,6 +79,8 @@ class DataGenerator:
         slack = 0
         loc = shuttle.loc
         trip = shuttle.trip[:]
+        for r in trip :
+            if trip.count(r) != 1 : return [False, 0]
         t = shuttle.t + 0
         t0 = t
 
@@ -191,6 +109,16 @@ class DataGenerator:
                     slack += (destTime - t)
         return [True, slack/(t-t0)]
 
+    def getCost(self, schedule):
+        totSlack = self.n
+        for shuttle in schedule.shuttles :
+            ableS = self.shuttleAbleS(shuttle)
+            if not ableS[0] :
+                return 2.0*self.n
+            totSlack += ableS[1]
+
+        return len(schedule.rejects) + self.n/totSlack
+
     def makeL(self, requests):
         L = []
         for req in requests :
@@ -205,10 +133,10 @@ class DataGenerator:
             if k in lst: trip.append(k)
         return trip
 
-    def optimize(self, shuttlesO):
+    def optimize(self, shuttlesO, shutT):
         shuttles = copy.deepcopy(shuttlesO)
-        idx = 0
-        l = len(shuttles)
+        idx, l = 0, len(shuttles)
+        success = False
         while idx < l :
             mark = []
             shuttle = shuttles[idx]
@@ -223,56 +151,163 @@ class DataGenerator:
                     if jdx == idx :
                         jdx += 1
                         continue
-                    ntrip = self.r1i1(shuttles[jdx], r)
+                    ntrip = self.insert(shuttles[jdx], r, shutT)
                     if ntrip == shuttles[jdx].trip :
                         jdx += 1
-                        continue # r1i1 is failed
+                        continue # insert is failed
                     else :
                         shuttles[jdx].trip = copy.deepcopy(ntrip)
                         mark += [r, -r]
                         break
 
-            if len(mark) == len(shuttle.trip) : # all trip are merged
+            if len(mark) == len(shuttle.trip) :
+                success = True # all trip are merged
                 shuttles = shuttles[:idx] + shuttles[idx+1:]
                 shuttlesO = copy.deepcopy(shuttles)
                 l = len(shuttles)
             else :
                 shuttles = copy.deepcopy(shuttlesO)
                 idx += 1
+        return success
 
-    def r1i1(self, shuttle, x):
+    def insert(self, shuttle, x, shutT):
         tripi = shuttle.trip[:]
-        tx = self.requests[x - 1][0]
-        tnx = self.requests[x - 1][2]
-
-        idx = 0
-        while idx < len(tripi): # insert 'x' to trip
-            r = tripi[idx]
-            t = self.requests[abs(r) - 1][(abs(r) - r) // abs(r)]
-            if t > tx:
-                tripi = tripi[:idx] + [x] + tripi[idx:]
-                break
-            idx += 1
-        if idx == len(tripi):
-            tripi = tripi[:] + [x]
-
-        idx = len(tripi)-1
-        while idx > -1: # insert '-x' to trip
-            r = tripi[(len(tripi)-1)-idx]
-            t = self.requests[abs(r) - 1][(abs(r) - r) // abs(r)]
-            if tnx > t:
-                tripi = tripi[:idx] + [-x] + tripi[idx:]
-                break
-            idx -= 1
         # add selected request to trip1
+        temp = self.mergeTrips(tripi, [x, -x])
+        if temp == None :
+            return shuttle.trip
 
-        shuttlei = Shuttle(shuttle.loc, tripi, shuttle.before, shuttle.t)
-        if self.shuttleAbleS(shuttlei)[0]:
-            return tripi
-        else : return shuttle.trip
+        nshuttle = Shuttle(shuttle.loc, temp, shuttle.before[:], shutT)
+        ableS = self.shuttleAbleS(nshuttle)
+        if ableS[0]:
+            return temp
+        return shuttle.trip
+
+    def insert2(self, shuttle, x, shutT):
+        tripi = shuttle.trip[:]
+        # add selected request to trip1
+        position = []
+        for xidx in range(len(tripi)) :
+            for nxidx in range(len(tripi)):
+                if nxidx < xidx : continue
+
+                temp = tripi[:xidx] + [x] + tripi[xidx:nxidx] + [-x] + tripi[nxidx:]
+                nshuttle = Shuttle(shuttle.loc, temp, shuttle.before[:], shutT)
+                ableS = self.shuttleAbleS(nshuttle)
+                if ableS[0] : # available trip
+                    position.append((temp[:], ableS[1]))
+
+        if len(position) < 1 :
+            return shuttle.trip
+
+        position.sort(key = lambda ps : -ps[1])
+        return position[0][0]
+
+    def mergeTrips(self, trip1, trip2):
+        mint1 = [[-1] * (len(trip2) + 1) for i in range(len(trip1) + 1)]
+        mint2 = [[-1] * (len(trip2) + 1) for i in range(len(trip1) + 1)]
+        p1 = [[-1] * (len(trip2) + 1) for i in range(len(trip1) + 1)]
+        p2 = [[-1] * (len(trip2) + 1) for i in range(len(trip1) + 1)]
+
+        mint1[0][0] = 0
+        mint2[0][0] = 0
+        trip1 = [0] + trip1
+        trip2 = [0] + trip2
+        for i in range(len(trip1)):  # the number of requests done in trip1
+            for j in range(len(trip2)):  # the number of requests done in trip2
+                if i == 0:
+                    sta1 = 0
+                else:
+                    if trip1[i] > 0:
+                        sta1 = self.requests[trip1[i] - 1][1]
+                    else:
+                        sta1 = self.requests[-trip1[i] - 1][3]
+
+                    if i == 1:
+                        sta1p = 0
+                    else:
+                        if trip1[i - 1] > 0:
+                            sta1p = self.requests[trip1[i - 1] - 1][1]
+                        else:
+                            sta1p = self.requests[-trip1[i - 1] - 1][3]
+
+                if j == 0:
+                    sta2 = 0
+                else:
+                    if trip2[j] > 0:
+                        sta2 = self.requests[trip2[j] - 1][1]
+                    else:
+                        sta2 = self.requests[-trip2[j] - 1][3]
+
+                    if j == 1:
+                        sta2p = 0
+                    else:
+                        if trip2[j - 1] > 0:
+                            sta2p = self.requests[trip2[j - 1] - 1][1]
+                        else:
+                            sta2p = self.requests[-trip2[j - 1] - 1][3]
+
+                if i > 0:
+                    if mint1[i - 1][j] != -1 and (
+                            mint1[i][j] == -1 or mint1[i][j] > mint1[i - 1][j] + self.dists[sta1p][sta1]):
+                        mint1[i][j] = mint1[i - 1][j] + self.dists[sta1p][sta1]
+                        p1[i][j] = 1
+                    if mint2[i - 1][j] != -1 and (
+                            mint1[i][j] == -1 or mint1[i][j] > mint2[i - 1][j] + self.dists[sta2][sta1]):
+                        mint1[i][j] = mint2[i - 1][j] + self.dists[sta2][sta1]
+                        p1[i][j] = 2
+
+                    if trip1[i] > 0:
+                        if mint1[i][j] != -1 and mint1[i][j] < self.requests[trip1[i] - 1][0]:
+                            mint1[i][j] = self.requests[trip1[i] - 1][0]
+                    if trip1[i] < 0:
+                        if mint1[i][j] != -1 and mint1[i][j] > self.requests[-trip1[i] - 1][2]:
+                            mint1[i][j] = -1
+
+                if j > 0:
+                    if mint1[i][j - 1] != -1 and (
+                            mint2[i][j] == -1 or mint2[i][j] > mint1[i][j - 1] + self.dists[sta1][sta2]):
+                        mint2[i][j] = mint1[i][j - 1] + self.dists[sta1][sta2]
+                        p2[i][j] = 1
+                    if mint2[i][j - 1] != -1 and (
+                            mint2[i][j] == -1 or mint2[i][j] > mint2[i][j - 1] + self.dists[sta2p][sta2]):
+                        mint2[i][j] = mint2[i][j - 1] + self.dists[sta2p][sta2]
+                        p2[i][j] = 2
+
+                    if trip2[j] > 0:
+                        if mint2[i][j] != -1 and mint2[i][j] < self.requests[trip2[j] - 1][0]:
+                            mint2[i][j] = self.requests[trip2[j] - 1][0]
+                    if trip2[j] < 0:
+                        if mint2[i][j] != -1 and mint2[i][j] > self.requests[-trip2[j] - 1][2]:
+                            mint2[i][j] = -1
+
+        if mint1[-1][-1] == -1 and mint2[-1][-1] == -1:
+            # print("Merge Trips Failed")
+            return None
+        else:
+            ret, p = [], 0
+            i = len(trip1) - 1
+            j = len(trip2) - 1
+            if mint1[-1][-1] == -1: p = 2
+            elif mint2[-1][-1] == -1: p = 1
+            elif mint1[-1][-1] < mint2[-1][-1]: p = 1
+            else: p = 2
+
+            while i > 0 or j > 0:
+                if p == 1:
+                    ret.append(trip1[i])
+                    p = p1[i][j]
+                    i -= 1
+                else:
+                    ret.append(trip2[j])
+                    p = p2[i][j]
+                    j -= 1
+            ret.reverse()
+            return ret
+
 
     #_______________________EDF_________________________
-    def generateEDF(self, schedule, t, off=False):
+    def generateEDF(self, schedule, t, off=False, opt = False):
         already = []
         for shuttle in schedule.shuttles :
             already += shuttle.trip + shuttle.before
@@ -280,11 +315,8 @@ class DataGenerator:
         reqs = list(enumerate(self.requests[:]))
         requests = list(filter(lambda req : ((req[0]+1) not in already) and (req[1][4] <= t), reqs))
         if off : requests = reqs
-        # request[0] = number of request
-        # request[1] = (timeS, stationS, timeD, stationD, timeO)
 
         routes = copy.deepcopy(schedule.shuttles)
-
         L = self.makeL(requests) # early deadline sorting
         for r in L:
             if r < 0 : continue
@@ -323,11 +355,20 @@ class DataGenerator:
                         schedule.rejects.append(r)
 
         # optimize
-        self.optimize(routes)
+        if opt :
+            re = self.optimize(routes, t)
+            while re : re = self.optimize(routes, t)
+            for r in schedule.rejects:
+                for i in range(len(routes)):
+                    k = self.mergeTrips(routes[i].trip, [r, -r])
+                    if k != None:
+                        routes[i].trip = k[:]
+                        schedule.rejects.remove(r)
+                        break
         return Schedule(routes, schedule.rejects)
 
     # _______________________LLF_________________________
-    def generateLLF(self, schedule, t, off=False): # EDF with Maximize Slack Time
+    def generateLLF(self, schedule, t, off=False, opt = False): # EDF with Maximize Slack Time
         already = []
         for shuttle in schedule.shuttles :
             already += shuttle.trip + shuttle.before
@@ -335,11 +376,8 @@ class DataGenerator:
         reqs = list(enumerate(self.requests[:]))
         requests = list(filter(lambda req : ((req[0]+1) not in already) and (req[1][4] <= t), reqs))
         if off : requests = reqs
-        # request[0] = number of request
-        # request[1] = (timeS, stationS, timeD, stationD, timeO)
 
         routes = copy.deepcopy(schedule.shuttles)
-
         L = self.makeL(requests) # early deadline sorting
         for r in L:
             jSlack = []
@@ -354,8 +392,7 @@ class DataGenerator:
                         mutab = False
                         break
                 if mutab: # Mutually available
-                    temp = route + [r, -r]
-                    tript = self.subL(self.L, temp)
+                    tript = self.subL(self.L, route + [r, -r])
                     nshuttle = Shuttle(shuttle.loc, tript, shuttle.before[:], t)
                     ableS = self.shuttleAbleS(nshuttle)
                     if ableS[0] :
@@ -380,8 +417,7 @@ class DataGenerator:
                 j = jSlack[0][0]
                 shuttle = routes[j]
                 route = shuttle.trip
-                temp = route + [r, -r]
-                tript = self.subL(self.L, temp)
+                tript = self.subL(self.L, route + [r, -r])
 
                 nshuttle = Shuttle(shuttle.loc, tript, shuttle.before[:], t)
                 routes[j] = nshuttle
@@ -390,12 +426,25 @@ class DataGenerator:
                     schedule.rejects.remove(r)
 
         # optimize
-        self.optimize(routes)
+        if opt :
+            re = self.optimize(routes, t)
+            while re : re = self.optimize(routes, t)
+            for r in schedule.rejects:
+                for i in range(len(routes)):
+                    k = self.mergeTrips(routes[i].trip, [r, -r])
+                    if k != None:
+                        routes[i].trip = k[:]
+                        schedule.rejects.remove(r)
+                        break
         return Schedule(routes, schedule.rejects)
 
     # _______________________GA_________________________
-    def generateGA(self, schedule, t, off=False): # Genetic Algorithm
-        if t==0 : return self.generateLLF(schedule, t)
+    def generateGA(self, schedule, t, off=False, opt = False): # Genetic Algorithm
+        if t==0 :
+            gaSchedule = self.GAOP(self.Ngene, self.Sgene)
+            return gaSchedule
+
+        # GA operating is already done, respect previous schedule
         already = []
         for shuttle in schedule.shuttles:
             already += shuttle.trip + shuttle.before
@@ -450,70 +499,128 @@ class DataGenerator:
                     schedule.rejects.remove(r)
 
         # optimize
-        self.optimize(routes)
+        if opt :
+            re = self.optimize(routes, t)
+            while re : re = self.optimize(routes, t)
+            for r in schedule.rejects:
+                for i in range(len(routes)):
+                    k = self.mergeTrips(routes[i].trip, [r, -r])
+                    if k != None:
+                        routes[i].trip = k[:]
+                        schedule.rejects.remove(r)
+                        break
         return Schedule(routes, schedule.rejects)
 
-    def insert0(self, shuttle, x, shutT):
-        tripi = shuttle.trip[:]
-        tx = self.requests[x - 1][0]
-        tnx = self.requests[x - 1][2]
-        xable = []
-        nxable =[]
 
-        idx = 0
-        while idx < len(tripi): # insert 'x' to trip
-            r = tripi[idx]
-            t = self.requests[abs(r) - 1][(abs(r) - r) // abs(r)]
-            if t > tx:
-                xable.append(idx)
-            idx += 1
-        if len(xable) < 1 :
-            xable.append(len(tripi))
+    def GAOP(self, Ngene = 1000, Sgene = 20):
+        genes = []
+        costs = []
 
-        idx = len(tripi) - 1
-        while idx > -1: # insert '-x' to trip
-            r = tripi[(len(tripi)-1)-idx]
-            t = self.requests[abs(r) - 1][(abs(r) - r) // abs(r)]
-            if tnx > t:
-                nxable.append(idx)
-            idx -= 1
-        if len(nxable) < 1 :
-            nxable.append(len(tripi))
+        dumy = Schedule([]) # initialize
+        genes.append(self.generateLLF(dumy, 0))
+        for i in range(Sgene-1):
+            genes.append(self.generateEDF(dumy, 0))
 
-        # add selected request to trip1
-        position = []
-        for xidx in xable :
-            for nxidx in nxable:
-                if nxidx < xidx : continue
+        for i in range(Sgene, Ngene):
+            i1 = random.randrange(Sgene)
+            i2 = random.randrange(Sgene)
+            genes.append(genes[i1].crossover(genes[i2]))
 
-                temp = tripi[:xidx] + [x] + tripi[xidx:nxidx] + [-x] + tripi[nxidx:]
-                nshuttle = Shuttle(shuttle.loc, temp, shuttle.before[:], shutT)
-                ableS = self.shuttleAbleS(nshuttle)
-                if ableS[0] : # available trip
-                    position.append((temp[:], ableS[1]))
+        genes.sort(key=lambda gene: self.getCost(gene))
+        init = copy.deepcopy(genes[0])
+        costs.append(self.getCost(genes[0]))
 
-        if len(position) < 1 :
-            return shuttle.trip
+        Nstep = self.gaN  # the number of steps of evolution
+        INF = 2.0*self.n
+        if costs[0] >= INF:
+            print("initial is shit!")
 
-        position.sort(key = lambda ps : -ps[1])
-        return position[0][0]
+        else:
+            print('{} : initial'.format(len(genes[0].rejects)))
+            for i in range(Nstep):
+                best = copy.deepcopy(genes[0])
+                print("step {idx} is running".format(idx=i + 1))
+                genes = genes[:Sgene]
 
-    def insert(self, shuttle, x, shutT):
-        tripi = shuttle.trip[:]
+                # Crossover
+                for j in range(Sgene, Ngene):
+                    i1 = random.randrange(Sgene)
+                    i2 = random.randrange(Sgene)
+                    genes.append(genes[i1].crossover(genes[i2]))
 
-        position = []
-        for xidx in range(len(tripi)) :
-            for nxidx in range(len(tripi)):
-                if nxidx < xidx : continue
+                # Mutation
+                for j in range(Sgene, Ngene):
+                    if random.random() < 0.1:
+                        i1 = random.randrange(self.n) + 1
+                        i2 = self.getSimilarRequest(i1 - 1) + 1
+                        genes[j].mutation(i1, i2)
 
-                temp = tripi[:xidx] + [x] + tripi[xidx:nxidx] + [-x] + tripi[nxidx:]
-                nshuttle = Shuttle(shuttle.loc, temp, shuttle.before[:], shutT)
-                ableS = self.shuttleAbleS(nshuttle)
-                if ableS[0] : # available trip
-                    position.append((temp[:], ableS[1]))
+                # Optimization
+                for j in range(Ngene):
+                    if self.getCost(genes[j]) < INF:
+                        genes[j] = self.optimizeGA(genes[j])
 
-        if len(position) < 1 :
-            return shuttle.trip
+                genes.sort(key=lambda gene: self.getCost(gene))
 
-        position.sort(key = lambda ps : -ps[1])
-        return position[0][0]
+                for j in range(Ngene - 1, 3, -1):
+                    if genes[j] == genes[j - 4]:
+                        if len(genes) <= Sgene:
+                            break
+                        del genes[j]
+                costs.append(self.getCost(genes[0]))
+                if (costs[i] > costs[i + 1]):
+                    print("{}% improved | {}".format((1 - (costs[i + 1] / costs[i])) * 100,
+                                                     len(genes[0].rejects)))
+                if costs[i+1] >= INF :
+                    genes[0] = copy.deepcopy(best)
+                    print('Detact : GA ERROR -> fix state')
+
+                # when better than the norm, stop generating
+                if (len(genes[0].rejects) <= 0):
+                    print("better than norm {}".format(len(genes[0].rejects)))
+                    break
+
+        print("\nresults.....")
+        for i in range(len(costs)):
+            if i in [1, 2, 3]:
+                pri = ["st", "nd", "rd"]
+                print("{cost} {n} {w}".format(cost=costs[i], n=i, w=pri[i - 1]))
+            else:
+                print("%f %d th" % (costs[i], i))
+        print("{}% improved".format((1 - (costs[len(costs) - 1] / costs[0])) * 100))
+        print('\nInit: ')
+        print(init)
+        print('\nResult : ')
+        print(genes[0])
+
+        return genes[0]
+
+    def getSimilarRequest(self, requestidx):
+        t = random.random()
+        for i in range(self.n):
+            if t < self.ST[requestidx][i]:
+                return i
+            else:
+                t -= self.ST[requestidx][i]
+        return self.n - 1
+
+    def optimizeGA(self, schedule):
+        rejects = schedule.rejects
+        shuts = copy.deepcopy(schedule.shuttles)
+
+        for i in range(len(shuts)-1, -1, -1):
+            for j in range(i):
+                k = self.mergeTrips(shuts[j].trip, shuts[i].trip)
+                if k != None:
+                    shuts[j].trip = k[:]
+                    del shuts[i]
+                    break
+        for r in rejects:
+            for i in range(len(shuts)):
+                k = self.mergeTrips(shuts[i].trip, [r, -r])
+                if k != None:
+                    shuts[i].trip = k[:]
+                    rejects.remove(r)
+                    break
+
+        return Schedule(shuts, rejects)
