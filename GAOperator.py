@@ -66,7 +66,7 @@ class GAOperator:
 
                 # Mutation
                 for j in range(Nggene, Ngene):
-                    if random.random() < 0.1:
+                    if random.random() < 0.15:
                         i1 = random.randrange(DG.n) + 1
                         # i2 = random.randrange(DG.m) + 1
                         i2 = DG.getSimilarRequest(i1 - 1) + 1

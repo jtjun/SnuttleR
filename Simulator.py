@@ -12,7 +12,7 @@ import copy
 
 class Simulator:
     # as time goes by simulate situation
-    def __init__(self, m = 20, n = 100, T = 1000, shutN = 10, offP = 0.65, \
+    def __init__(self, m = 20, n = 100, T = 1000, shutN = 10, offP = 0.7, \
                  MapType = 'nomal', ReqType = 'AR', gaN = 5):
         self.m = m  # number of stations
         self.n = n  # number of requests
