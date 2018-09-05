@@ -3,23 +3,26 @@ from RequestGenerator import RequestGenerator
 from DataGenerator import DataGenerator
 from Schedule import Schedule
 from Visualization import Visualization
+
+from GAOperator import GAOperator
 from Shuttle import Shuttle
+
 import random
 import copy
 
 class Simulator:
     # as time goes by simulate situation
-    def __init__(self, m = 20, n = 100, T = 1000, shutN = 10, onP = 0.5, \
+    def __init__(self, m = 20, n = 100, T = 1000, shutN = 10, offP = 0.65, \
                  MapType = 'nomal', ReqType = 'AR', gaN = 10):
         self.m = m  # number of stations
         self.n = n  # number of requests
         self.shutN = shutN  # number of shuttles
         self.T = T  # running time
-        self.onP = onP
+        self.offP = offP
         self.gaN = gaN
 
         self.MG = MapGenerator(self.m, MapType)
-        self.RG = RequestGenerator(self.MG, ReqType, self.n, self.T, onP)
+        self.RG = RequestGenerator(self.MG, ReqType, self.n, self.T, self.offP)
         self.DG = DataGenerator(self.MG, self.RG, shutN, gaN)
         self.requests = self.RG.requests[:]
 
@@ -31,24 +34,33 @@ class Simulator:
         ret = ""
         return ret
 
-    def __main__(self, numm, typ, off, opt): # when call the main, new schedule is generated
+    def GAINIT(self, off):
+        GAOP = GAOperator(self.DG, 'LLF', 0, self.gaN, self.offP, off)
+        trips = GAOP.getResult()
+        shuttles =[]
+        for trip in trips:
+            shuttle = Shuttle(self.MG.depot, trip, [], 0)
+            shuttles.append(shuttle)
+        return Schedule(shuttles)
+
+    def __main__(self, numm, typ, off): # when call the main, new schedule is generated
         requests = self.requests[:]
         schedule = Schedule([])
         late = []
         self.late = late
 
         if off :
-            if typ == 'EDF' : schedule = self.DG.generateEDF(schedule, 0, True, opt)
-            if typ == 'LLF' : schedule = self.DG.generateLLF(schedule, 0, True, opt)
-            if typ == 'GA' : schedule = self.DG.generateGA(schedule, 0, True, opt)
+            if typ == 'EDF' : schedule = self.DG.generateEDF(schedule, 0, True)
+            if typ == 'LLF' : schedule = self.DG.generateLLF(schedule, 0, True)
+            if typ == 'GA' : schedule = self.GAINIT(True)
             self.report(schedule, typ + ' off ' + str(numm))
             return len(schedule.rejects)
 
         # initialize schedule
         requestsT = list(filter(lambda r: r[4] < 0, requests))
-        if typ == 'EDF' : schedule = self.DG.generateEDF(schedule, 0, opt)
-        if typ == 'LLF' : schedule = self.DG.generateLLF(schedule, 0, opt)
-        if typ == 'GA' : schedule = self.DG.generateGA(schedule, 0, opt)
+        if typ == 'EDF' : schedule = self.DG.generateEDF(schedule, 0)
+        if typ == 'LLF' : schedule = self.DG.generateLLF(schedule, 0)
+        if typ == 'GA' : schedule = self.GAINIT(False)
 
         # time is ticking
         for t in range(1, self.T) :
@@ -97,14 +109,14 @@ class Simulator:
             else: continue  # there are no new requests
 
             # online processing if there are new requests
-            if typ != 'GA':
+            if typ in ['EDF', 'LLF']:
                 for shuttle in schedule.shuttles :
                     shuttle.trip = self.haveToGo(shuttle)[:]
                     # now all shuttles has only 'have to go'
 
-            if typ == 'EDF': schedule = self.DG.generateEDF(schedule, t, opt)
-            if typ == 'LLF': schedule = self.DG.generateLLF(schedule, t, opt)
-            if typ == 'GA' : schedule = self.DG.generateGA(schedule, t, opt)
+            if typ == 'EDF': schedule = self.DG.generateEDF(schedule, t)
+            if typ == 'LLF': schedule = self.DG.generateLLF(schedule, t)
+            if typ == 'GA' : schedule = self.DG.generateGA(schedule, t)
 
         # time ticking is done
         self.late = late
@@ -136,7 +148,8 @@ class Simulator:
         for shuttle in schedule.shuttles :
             print(shuttle.before, shuttle.trip, self.DG.checkAble(shuttle))
         if self.DG.getCost(schedule) >= 2.0*self.n :
-            print('ERROR : Duplicate {}'.format(self.DG.getCost(schedule)))
+            print('ERROR : 0.01:duplicate / 1.0:index {}'.format(self.DG.getCost(schedule)))
+            print('_____________________\n')
             return 0
         print('_____________________\n')
 
@@ -165,19 +178,14 @@ class Simulator:
         V.drawTrips(self.MG, self.RG, schedule, 'test '+str(numm))
         print('_____________________\n')
 
-def simul(Simulator, number, typ, off, opt):
+def simul(Simulator, number, typ, off):
     S = copy.deepcopy(Simulator)
-    return S.__main__(number, typ, off, opt)
-
+    return S.__main__(number, typ, off)
 if __name__ == "__main__":
     n = 1
     off = False
-    opt = True
     S = Simulator(MapType='clust', ReqType='CS2')
-    if opt : print('opt is running')
     for i in range(n) :
-        simul(S, i, 'EDF', off, opt)
-        #simul(S, i, 'EDF', True, opt)
-        simul(S, i, 'LLF', off, opt)
-        #simul(S, i, 'LLF', True)
-        simul(S, i, 'GA', off, opt)
+        simul(S, i, 'EDF', off)
+        simul(S, i, 'LLF', off)
+        simul(S, i, 'GA', off)

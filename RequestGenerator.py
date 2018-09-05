@@ -9,10 +9,10 @@ class RequestGenerator() :
     # request[4] = timeO := Time that request is occur < timeS
     # n : the number of requests
     # T : the maximum time of the simulation
-    def __init__(self, MG, typ = 'AR', n = 100, T = 1440, onP = 0.5):
+    def __init__(self, MG, typ = 'AR', n = 100, T = 1440, offP = 0.5):
         self.n = n
         self.T = T
-        self.offRN = n-((onP*n)//1)
+        self.offRN = n*offP
 
         self.Map = MG
         self.m = MG.m
@@ -39,21 +39,22 @@ class RequestGenerator() :
         pass
 
     def __str__(self):
+        offR = 0
+        for r in self.requests:
+            if r[4] == 0: offR += 1
+
         ret = ""
-        ret += "The number of requests : {n}\n".format(n=len(self.requests))
+        ret += "The number of requests : {n} | off {off}\n".format(n=len(self.requests), off=offR)
         for request in self.requests: ret += "{r}\n".format(r=request)
         ret += "------------------------------------\n"
         return ret
 
     def rand(self):
         lst = []
-        offR = 0
         for i in range(self.n):
             req = self.makeReq()
-            if req[4] == 0 :
-                offR += 1
             lst.append(req)
-        return self.ensureOFF(lst, offR)
+        return self.ensureOFF(lst)
 
     def makeReq(self):
         sta0 = random.randrange(self.m)
@@ -87,7 +88,6 @@ class RequestGenerator() :
 
     def cluster(self):
         lst = []
-        offR = 0 # counting offline
         for i in range(self.n//2):
             sta0 = random.randrange(self.m//2)
             sta1 = (sta0 + random.randrange(1, self.m//2)) % (self.m//2)
@@ -99,9 +99,7 @@ class RequestGenerator() :
             t1 = int(math.floor(t0 + d))
 
             td = t0 - tdis
-            if td <= 0:
-                tO = 0
-                offR += 1
+            if td <= 0: tO = 0
             else: tO = random.randrange(0, td)
             lst.append((t0, sta0, t1, sta1, tO))
             
@@ -116,13 +114,11 @@ class RequestGenerator() :
             t1 = int(math.floor(t0 + d))
 
             td = t0 - tdis
-            if td <= 0:
-                tO = 0
-                offR += 1
+            if td <= 0: tO = 0
             else : tO = random.randrange(0, td)
             lst.append((t0, sta0, t1, sta1, tO))
         # separate map into 2 area
-        return self.ensureOFF(lst, offR)
+        return self.ensureOFF(lst)
 
     def cluster2(self, p):
         np = int(self.n*p)
@@ -142,19 +138,22 @@ class RequestGenerator() :
             t1 = int(math.floor(t0 + d))
 
             td = t0 - tdis
-            if td <= 0:
-                tO = 0
-                offR += 1
+            if td <= 0: tO = 0
             else : tO = random.randrange(0, td)
             requests2.append((t0, sta0, t1, sta1, tO))
 
         lst = requests1+requests2
-        return self.ensureOFF(lst, offR)
+        return self.ensureOFF(lst)
 
-    def ensureOFF(self, lst, offR):
+    def ensureOFF(self, lst):
+        offR = 0
+        for r in lst :
+            if r[4] == 0 : offR += 1
+
         idx = 0 # ensure offline requests number = self.offRN
         # case : smaller number of offline
         while offR < self.offRN :
+            if offR == self.offRN : break
             req = lst[idx]
             if req[4] != 0 :
                 lst[idx] = (req[0], req[1], req[2], req[3], 0)
@@ -163,16 +162,17 @@ class RequestGenerator() :
 
         # case : larger number of offline
         while offR > self.offRN :
+            if offR == self.offRN: break
             req = self.makeReq()
             while req[4] == 0:
                 req = self.makeReq()
-            finding = True
-            while finding :
-                r = lst[idx]
-                if r[4] == 0 :
-                    r = copy.deepcopy(req)
-                    finding = False
-                idx += 1
+
+            jdx = 0
+            while jdx < len(lst) :
+                if lst[jdx][4] == 0 :
+                    lst[jdx] = copy.deepcopy(req)
+                    break
+                jdx += 1
             offR -= 1
 
         return lst
