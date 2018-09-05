@@ -7,19 +7,19 @@ class Chromosome:
     # rejects : an array of rejected requests
     # reqN : total number of requests
     
-    def __init__(self, reqN, trips):
-        self.reqN = reqN
+    def __init__(self, reqS, trips):
+        self.reqS = reqS
+        self.reqN = len(reqS)
         self.trips = copy.deepcopy(trips)
         self.trips.sort(key = lambda trip: len(trip))
 
-        self.rejects = list(filter(lambda r: not any(r in trip for trip in self.trips), range(1, self.reqN+1)))
+        self.rejects = list(filter(lambda r: not any(r in trip for trip in self.trips), reqS))
         self.rejects.sort()
 
     def __str__(self):
         wholetrip = []
         for trip in self.trips:
             wholetrip += trip
-        self.reqN = len(wholetrip) + len(self.rejects)
 
         ret = "--------------------"
         ret += "{w} Accepted: {a}, Rejected: {r}, Reject Ratio: {rr}\n"\
@@ -48,7 +48,6 @@ class Chromosome:
                 self.rejects[i] = x
 
     def crossover(self, other):
-        retreqN = max([self.reqN, other.reqN])
         trips1 = copy.deepcopy(self.trips)
         trips2 = copy.deepcopy(other.trips)
 
@@ -68,4 +67,4 @@ class Chromosome:
             rettrips.sort(key = lambda trip: -len(trip))
             rettrips = rettrips[:10]
         
-        return Chromosome(retreqN, rettrips)
+        return Chromosome(self.reqS, rettrips)

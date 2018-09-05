@@ -11,6 +11,7 @@ class GAOperator:
         self.costs = []
         self.normR = normR
         self.onlR = onlR
+        self.offRs = DG.offRs
 
         Ngene = 1000 # the number of genes
         Nggene = 20 # the number of genes which can survive
@@ -22,7 +23,7 @@ class GAOperator:
                 schedule = DG.generateEDF(dumy, 0, off)
                 for shuttle in schedule.shuttles :
                     trips.append(shuttle.trip)
-                self.genes.append(Chromosome(DG.n, trips))
+                self.genes.append(Chromosome(self.offRs, trips))
 
         elif initial == 'LLF':
             for i in range(Nggene):
@@ -30,7 +31,7 @@ class GAOperator:
                 schedule = DG.generateLLF(dumy, 0, off)
                 for shuttle in schedule.shuttles :
                     trips.append(shuttle.trip)
-                self.genes.append(Chromosome(DG.n, trips))
+                self.genes.append(Chromosome(self.offRs, trips))
 
         
         for i in range(Nggene, Ngene):
@@ -124,7 +125,7 @@ class GAOperator:
                 if k != None:
                     trips[i] = k[:]
                     break
-        return Chromosome(DG.n, trips)
+        return Chromosome(self.offRs, trips)
 
     def getResult(self):
         return self.genes[0].trips

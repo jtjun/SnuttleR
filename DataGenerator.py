@@ -25,6 +25,9 @@ class DataGenerator:
 
         self.Ngene = 500
         self.Sgene = 20
+
+        reqs = list(range(1, self.n+1))
+        self.offRs = list(filter(lambda req : self.requests[req-1][4] == 0, reqs))
         pass
 
     def __str__(self):
