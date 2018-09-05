@@ -131,7 +131,7 @@ class DataGenerator:
         return [True, slack/(t-t0)]
 
     def getCost(self, schedule):
-        # 2.0*n : not able Shuttle
+        # 2.0*n : impossible Shuttle
         # 1.0 : index_r > index_-r
         # 0.01 : duplicate
         totSlack = self.n

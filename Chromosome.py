@@ -16,8 +16,13 @@ class Chromosome:
         self.rejects.sort()
 
     def __str__(self):
+        wholetrip = []
+        for trip in self.trips:
+            wholetrip += trip
+        self.reqN = len(wholetrip) + len(self.rejects)
+
         ret = "--------------------"
-        ret += "Accepted: {a}, Rejected: {r}, Reject Ratio: {rr}\n".format(a = self.reqN - len(self.rejects), r = len(self.rejects), rr = len(self.rejects) / self.reqN)
+        ret += "{w} Accepted: {a}, Rejected: {r}, Reject Ratio: {rr}\n".format(w = self.reqN, a = len(self.wholetrip)//2, r = len(self.rejects), rr = len(self.rejects)/self.reqN)
         for idx, trip in enumerate(self.trips):
             ret += "Shuttle {i}: {t}\n".format(i = idx, t = trip)
         ret += "Rejected: {r}\n".format(r = self.rejects)

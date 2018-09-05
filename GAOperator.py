@@ -6,11 +6,11 @@ import random
 import copy
 
 class GAOperator:
-    def __init__(self, DG, initial, normR, ns = 25, offP = 0.5, off = False):
+    def __init__(self, DG, initial, normR, onlR, ns = 25, off = False):
         self.genes = []
         self.costs = []
         self.normR = normR
-        self.On = int(DG.n - DG.n*offP)
+        self.onlR = onlR
 
         Ngene = 1000 # the number of genes
         Nggene = 20 # the number of genes which can survive
@@ -49,7 +49,8 @@ class GAOperator:
             print("initial is shit!")
 
         else :
-            print('{} : initial'.format(len(self.genes[0].rejects)-self.On))
+            print('*Processing offline requests in GA* (online : {})'.format(self.onlR))
+            print('{} : initial'.format(len(self.genes[0].rejects)))
             for i in range(Nstep):
 
                 print("step {idx} is running".format(idx = i+1))
@@ -84,11 +85,11 @@ class GAOperator:
                         del self.genes[j]
                 self.costs.append(DG.getCostGA(self.genes[0]))
                 if(self.costs[i] > self.costs[i+1]) :
-                    print("{}% improved | {}".format((1-(self.costs[i+1]/self.costs[i]))*100, len(self.genes[0].rejects)-self.On))
+                    print("{}% improved | {}".format((1-(self.costs[i+1]/self.costs[i]))*100, len(self.genes[0].rejects)))
 
                     # when better than the norm, stop generating
-                if(len(self.genes[0].rejects)-self.On <= self.normR) :
-                    print("better than norm".format(len(self.genes[0].rejects)-self.On))
+                if(len(self.genes[0].rejects) <= self.normR) :
+                    print("better than norm".format(len(self.genes[0].rejects)))
                     break
 
         print("\nresults.....")
@@ -123,7 +124,7 @@ class GAOperator:
                 if k != None:
                     trips[i] = k[:]
                     break
-        return Chromosome(chromo.reqN, trips)
+        return Chromosome(DG.n, trips)
 
     def getResult(self):
         return self.genes[0].trips

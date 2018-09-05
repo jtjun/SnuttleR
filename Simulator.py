@@ -35,7 +35,8 @@ class Simulator:
         return ret
 
     def GAINIT(self, off):
-        GAOP = GAOperator(self.DG, 'LLF', 0, self.gaN, self.offP, off)
+        onlR = int(self.n*(1-self.offP))
+        GAOP = GAOperator(self.DG, 'LLF', 0, onlR, self.gaN, off)
         trips = GAOP.getResult()
         shuttles =[]
         for trip in trips:
