@@ -179,14 +179,12 @@ class Simulator:
         V.drawTrips(self.MG, self.RG, schedule, 'test '+str(numm))
         print('_____________________\n')
 
-def simul(Simulator, number, typ, off):
-    S = copy.deepcopy(Simulator)
-    return S.__main__(number, typ, off)
+
 if __name__ == "__main__":
     n = 1
     off = False
     S = Simulator(MapType='clust', ReqType='CS2')
     for i in range(n) :
-        simul(S, i, 'EDF', off)
-        simul(S, i, 'LLF', off)
-        simul(S, i, 'GA', off)
+        S.__main__(i, 'EDF', off)
+        S.__main__(i, 'LLF', off)
+        S.__main__(i, 'GA', off)
