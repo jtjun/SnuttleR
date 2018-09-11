@@ -13,7 +13,7 @@ import copy
 class Simulator:
     # as time goes by simulate situation
     def __init__(self, m = 20, n = 100, T = 1000, shutN = 10, shutC = 5, offP = 0.6, \
-                 MapType = 'nomal', ReqType = 'AR', gaN = 5):
+                 MapType = 'nomal', ReqType = 'AR', gaN = 3):
         self.m = m  # number of stations
         self.n = n  # number of requests
         self.shutN = shutN  # number of shuttles
@@ -191,6 +191,7 @@ if __name__ == "__main__":
     off = False
     S = Simulator(MapType='clust', ReqType='CS2')
     for i in range(n) :
-        S.__main__(i, 'EDF', off)
-        S.__main__(i, 'LLF', off)
-        S.__main__(i, 'GA', off)
+        edf = S.__main__(i, 'EDF', off)
+        llf = S.__main__(i, 'LLF', off)
+        ga = S.__main__(i, 'GA', off)
+        print('EDF : {e} | LLF : {l} | GA : {g}'.format(e = edf, l=llf, g=ga))
