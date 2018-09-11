@@ -12,14 +12,15 @@ import copy
 
 class Simulator:
     # as time goes by simulate situation
-    def __init__(self, m = 20, n = 100, T = 1000, shutN = 10, offP = 0.7, \
+    def __init__(self, m = 20, n = 100, T = 1000, shutN = 10, shutC = 5, offP = 0.6, \
                  MapType = 'nomal', ReqType = 'AR', gaN = 5):
         self.m = m  # number of stations
         self.n = n  # number of requests
         self.shutN = shutN  # number of shuttles
         self.T = T  # running time
-        self.offP = offP
-        self.gaN = gaN
+        self.shutC = shutC # capacity of shuttle
+        self.offP = offP # ratio of offline requests
+        self.gaN = gaN # number of GA steps
 
         self.MG = MapGenerator(self.m, MapType)
         self.RG = RequestGenerator(self.MG, ReqType, self.n, self.T, self.offP)
@@ -82,6 +83,9 @@ class Simulator:
                     # if destTime > t : customer not arrived yet, waiting
                     if destTime <= t : # customer arrived
                         if shuttle.loc == sta : # shuttle arrived
+                            custN = shuttle.getCustN()
+                            if custN >= self.shutC :
+                                print('ERROR : exceed the shuttle capacity {}'.format(custN))
                             shuttle.before.append(dest)
                             shuttle.trip = shuttle.trip[1:]
                         # else : shuttle not arrived yet

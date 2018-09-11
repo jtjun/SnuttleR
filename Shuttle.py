@@ -36,3 +36,10 @@ class Shuttle:
             loc = (self.loc[0] + ((dest[0] - self.loc[0])/k), \
                    self.loc[1] + ((dest[1] - self.loc[1])/k))
             self.loc = loc
+
+    def getCustN(self):
+        custN = 0
+        for r in self.before :
+            if (r > 0) and (-r not in self.before) :
+                custN += 1
+        return custN
