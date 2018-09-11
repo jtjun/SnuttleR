@@ -40,6 +40,6 @@ class Shuttle:
     def getCustN(self):
         custN = 0
         for r in self.before :
-            if (r > 0) and (-r not in self.before) :
-                custN += 1
+            if r > 0 : custN += 1
+            else : custN -= 1
         return custN

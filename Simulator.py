@@ -29,6 +29,8 @@ class Simulator:
 
         print(self.MG)
         print(self.RG)
+        print('Stations : {m} | Requests : {r} | Shuttles : {s}\nTime : {t} | Off proportion : {o} | Capacity : {c}\n'\
+              .format(m=self.m, r=self.n, s=self.shutN, t=self.T, o=self.offP, c=self.shutC))
         pass
 
     def __str__(self):
