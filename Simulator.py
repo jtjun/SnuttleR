@@ -7,9 +7,6 @@ from Visualization import Visualization
 from GAOperator import GAOperator
 from Shuttle import Shuttle
 
-import random
-import copy
-
 class Simulator:
     # as time goes by simulate situation
     def __init__(self, m = 20, n = 100, T = 1000, shutN = 10, shutC = 5, offP = 0.6, \
