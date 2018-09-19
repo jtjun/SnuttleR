@@ -193,7 +193,7 @@ class Simulator:
         f.close()
 
 if __name__ == "__main__":
-    n = 10
+    n = 1
     off = False
     for i in range(n) :
         S = Simulator(MapType='clust', ReqType='CS2')

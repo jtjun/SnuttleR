@@ -180,7 +180,8 @@ class DataGenerator:
 
                 if trip[i + 1] < 0:
                     if ts[i + 1] < at:
-                        return False
+                        #return False
+                        ats.append(at)
                     else:
                         ats.append(at)
 

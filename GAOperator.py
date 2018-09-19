@@ -82,6 +82,7 @@ class GAOperator:
                         if len(self.genes) <= Nggene:
                             break
                         del self.genes[j]
+
                 self.costs.append(DG.getCostGA(self.genes[0]))
                 if(self.costs[i] > self.costs[i+1]) :
                     print("{}% improved | {}".format((1-(self.costs[i+1]/self.costs[i]))*100, len(self.genes[0].rejects)))
