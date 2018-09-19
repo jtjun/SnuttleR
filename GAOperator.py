@@ -88,8 +88,8 @@ class GAOperator:
                     print("{}% improved | {}".format((1-(self.costs[i+1]/self.costs[i]))*100, len(self.genes[0].rejects)))
 
                     # when better than the norm, stop generating
-                if(len(self.genes[0].rejects) <= self.normR) :
-                    print("better than norm".format(len(self.genes[0].rejects)))
+                if(len(self.genes[0].rejects) < 1) :
+                    print("there are no reject".format(len(self.genes[0].rejects)))
                     break
 
         print("\nresults.....")

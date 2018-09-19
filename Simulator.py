@@ -10,7 +10,7 @@ from Shuttle import Shuttle
 class Simulator:
     # as time goes by simulate situation
     def __init__(self, m = 20, n = 100, T = 1000, shutN = 10, shutC = 5, offP = 0.6, \
-                 MapType = 'clust', ReqType = 'CS2', gaN = 3):
+                 MapType = 'clust', ReqType = 'CS2', gaN = 5):
         self.m = m  # number of stations
         self.n = n  # number of requests
         self.shutN = shutN  # number of shuttles
