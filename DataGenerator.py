@@ -54,7 +54,7 @@ class DataGenerator:
         tripSet = []
 
         for trip in trips:
-
+            if not self.available(trip) : return False
             tripSet += trip
 
         for i in range(self.n):
@@ -69,10 +69,10 @@ class DataGenerator:
 
     def available(self, trip):
         ts, stas, l, i = [], [], 0, 0
-        for i in trip:
-            ia = abs(i)
-            ts.append(self.requests[ia - 1][(ia - i) // ia])
-            stas.append(self.requests[ia - 1][((ia - i) // ia) + 1])
+        for r in trip:
+            ra = abs(r)
+            ts.append(self.requests[ra - 1][(ra - r) // ra])
+            stas.append(self.requests[ra - 1][((ra - r) // ra) + 1])
             l += 1
 
         ats = [ts[0]]  # arrival times
