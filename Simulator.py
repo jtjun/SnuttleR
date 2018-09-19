@@ -10,7 +10,7 @@ from Shuttle import Shuttle
 class Simulator:
     # as time goes by simulate situation
     def __init__(self, m = 20, n = 100, T = 1000, shutN = 10, shutC = 5, offP = 0.6, \
-                 MapType = 'clust', ReqType = 'CS2', gaN = 5):
+                 MapType = 'clust', ReqType = 'CS2', gaN = 9, upp = True):
         self.m = m  # number of stations
         self.n = n  # number of requests
         self.shutN = shutN  # number of shuttles
@@ -19,7 +19,7 @@ class Simulator:
         self.offP = offP # ratio of offline requests
         self.gaN = gaN # number of GA steps
 
-        self.MG = MapGenerator(self.m, MapType)
+        self.MG = MapGenerator(self.m, MapType, upp)
         self.RG = RequestGenerator(self.MG, ReqType, self.n, self.T, self.offP)
         self.DG = DataGenerator(self.MG, self.RG, shutN, gaN)
         self.requests = self.RG.requests[:]

@@ -5,7 +5,7 @@ class MapGenerator:
     # m : the number of stations
     # stations : locations of stations [tuple of 2 real numbers and name (x, y, name)] == map info
     # dists : matrix which has the distance info
-    def __init__(self, m = 20, typ = 'nomal'):
+    def __init__(self, m = 20, typ = 'nomal', upp = True):
         self.m = m
         if typ == 'nomal' :
             self.stations = []
@@ -34,6 +34,7 @@ class MapGenerator:
                                             +(self.stations[j][1]-self.depot[1])**2))
 
         self.dists = self.getDists()
+        if upp : self.upper() # all dist be synchronized whit tick
         pass
 
     def __str__(self):
@@ -62,3 +63,14 @@ class MapGenerator:
     def getLocDist(self, loc, x):
         return math.sqrt((self.stations[x][0] - loc[0]) ** 2
                          + (self.stations[x][1] - loc[1]) ** 2)
+
+    def upper(self):
+        for distt in self.dists :
+            i = 0
+            while i < len(distt) :
+                distt[i] = math.ceil(distt[i])
+                i += 1
+        j =0
+        while j < len(self.distdepot) :
+            self.distdepot[j] = math.ceil(self.distdepot[j])
+            j += 1
