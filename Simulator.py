@@ -36,7 +36,7 @@ class Simulator:
 
     def GAINIT(self, off):
         onlR = int(self.n*(1-self.offP))
-        GAOP = GAOperator(self.DG, 'LLF', 0, onlR, self.gaN, off)
+        GAOP = GAOperator(self.DG, 0, onlR, self.gaN, off)
         trips = GAOP.getResult()
         shuttles =[]
         for trip in trips:
@@ -182,6 +182,11 @@ class Simulator:
         V.drawTrips(self.MG, self.RG, schedule, 'test '+str(numm))
         print('_____________________\n')
 
+    def saving(self, e, l, g):
+        f = open("./result/result.csv", 'a')
+        f.write("\n{e},{l},{g},{w},{m},{n},{o},{sn},{sc}"\
+                .format(e=e,l=l,g=g,w='|',m=self.m,n=self.n,o=self.offP,sn=self.shutN,sc=self.shutC))
+        f.close()
 
 if __name__ == "__main__":
     n = 1
@@ -191,4 +196,5 @@ if __name__ == "__main__":
         edf = S.__main__(i, 'EDF', off)
         llf = S.__main__(i, 'LLF', off)
         ga = S.__main__(i, 'GA', off)
+        S.saving(edf,llf,ga)
         print('EDF : {e} | LLF : {l} | GA : {g}'.format(e = edf, l=llf, g=ga))

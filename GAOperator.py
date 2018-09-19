@@ -6,7 +6,7 @@ import random
 import copy
 
 class GAOperator:
-    def __init__(self, DG, initial, normR, onlR, ns = 25, off = False):
+    def __init__(self, DG, normR, onlR, ns = 25, off = False):
         self.genes = []
         self.costs = []
         self.normR = normR
@@ -16,23 +16,21 @@ class GAOperator:
         Ngene = 1000 # the number of genes
         Nggene = 20 # the number of genes which can survive
 
-        dumy = Schedule([])
-        if initial == 'EDF':
-            for i in range(Nggene):
-                trips = []
-                schedule = DG.generateEDF(dumy, 0, off)
-                for shuttle in schedule.shuttles :
-                    trips.append(shuttle.trip)
-                self.genes.append(Chromosome(self.offRs, trips))
+        dumyE = Schedule([])
+        dumyL = Schedule([])
 
-        elif initial == 'LLF':
-            for i in range(Nggene):
-                trips = []
-                schedule = DG.generateLLF(dumy, 0, off)
-                for shuttle in schedule.shuttles :
-                    trips.append(shuttle.trip)
-                self.genes.append(Chromosome(self.offRs, trips))
+        for i in range(Nggene):
+            trips = []
+            scheduleEDF = DG.generateEDF(dumyE, 0, off)
+            scheduleLLF = DG.generateLLF(dumyL, 0, off)
 
+            if len(scheduleEDF.rejects) < len(scheduleLLF.rejects) :
+                schedule = scheduleEDF
+            else : schedule = scheduleLLF
+
+            for shuttle in schedule.shuttles :
+                trips.append(shuttle.trip)
+            self.genes.append(Chromosome(self.offRs, trips))
         
         for i in range(Nggene, Ngene):
             i1 = random.randrange(Nggene)
