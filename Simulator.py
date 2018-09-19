@@ -10,7 +10,7 @@ from Shuttle import Shuttle
 class Simulator:
     # as time goes by simulate situation
     def __init__(self, m = 20, n = 100, T = 1000, shutN = 10, shutC = 5, offP = 0.6, \
-                 MapType = 'nomal', ReqType = 'AR', gaN = 3):
+                 MapType = 'clust', ReqType = 'CS2', gaN = 3):
         self.m = m  # number of stations
         self.n = n  # number of requests
         self.shutN = shutN  # number of shuttles
@@ -184,17 +184,21 @@ class Simulator:
 
     def saving(self, e, l, g):
         f = open("./result/result.csv", 'a')
-        f.write("\n{e},{l},{g},{w},{m},{n},{o},{sn},{sc}"\
-                .format(e=e,l=l,g=g,w='|',m=self.m,n=self.n,o=self.offP,sn=self.shutN,sc=self.shutC))
+        el = (1-1.0*e/l)*100
+        gl = (1-1.0*g/l)*100
+        f.write("\n{e},{l},{g},|,{m},{n},{o},{sn},{sc},|,{el},{ll},{gl}"\
+                .format(e=e,l=l,g=g,\
+                        m=self.m,n=self.n,o=self.offP,sn=self.shutN,sc=self.shutC,\
+                        el=el,ll=0,gl=gl))
         f.close()
 
 if __name__ == "__main__":
-    n = 1
+    n = 10
     off = False
-    S = Simulator(MapType='clust', ReqType='CS2')
     for i in range(n) :
-        edf = S.__main__(i, 'EDF', off)
-        llf = S.__main__(i, 'LLF', off)
-        ga = S.__main__(i, 'GA', off)
+        S = Simulator(MapType='clust', ReqType='CS2')
+        edf = S.__main__(0, 'EDF', off)
+        llf = S.__main__(0, 'LLF', off)
+        ga = S.__main__(0, 'GA', off)
         S.saving(edf,llf,ga)
         print('EDF : {e} | LLF : {l} | GA : {g}'.format(e = edf, l=llf, g=ga))
