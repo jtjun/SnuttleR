@@ -9,6 +9,7 @@ class RequestGenerator() :
     # request[4] = timeO := Time that request is occur < timeS
     # n : the number of requests
     # T : the maximum time of the simulation
+    # rDS : list of request's dist/timeD-timeS
     def __init__(self, MG, typ = 'AR', n = 100, T = 1440, offP = 0.5):
         self.n = n
         self.T = T
@@ -197,3 +198,11 @@ class RequestGenerator() :
                     rw.append(0.0)
             ret.append(rw)
         return ret
+
+    def rDS(self):
+        sum = 0
+        for r in self.requests:
+            d = self.dists[r[1]][r[3]]
+            dt = r[2]-r[0]
+            sum += 1.0*d/dt
+        return sum/self.n

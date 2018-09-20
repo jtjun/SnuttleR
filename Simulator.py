@@ -10,7 +10,7 @@ from Shuttle import Shuttle
 class Simulator:
     # as time goes by simulate situation
     def __init__(self, m = 20, n = 100, T = 1000, shutN = 10, shutC = 5, offP = 0.6, \
-                 MapType = 'clust', ReqType = 'CS2', gaN = 9, upp = True):
+                 MapType = 'clust', ReqType = 'CS2', gaN = 9, upp = False):
         self.m = m  # number of stations
         self.n = n  # number of requests
         self.shutN = shutN  # number of shuttles
@@ -28,6 +28,7 @@ class Simulator:
         print(self.RG)
         print('Stations : {m} | Requests : {r} | Shuttles : {s}\nTime : {t} | Off proportion : {o} | Capacity : {c}\n'\
               .format(m=self.m, r=self.n, s=self.shutN, t=self.T, o=self.offP, c=self.shutC))
+        self.rDS = self.RG.rDS()
         pass
 
     def __str__(self):
@@ -185,13 +186,14 @@ class Simulator:
 
     def saving(self, edf, llf, ga):
         e, l, g = edf[0], llf[0], ga[0]
+        el = (1 - 1.0 * e / self.n) * 100
+        ll = (1 - 1.0 * l / self.n) * 100
+        gl = (1 - 1.0 * g / self.n) * 100
+
         f = open("./result/result.csv", 'a')
-        el = (1-1.0*e/self.n)*100
-        ll = (1-1.0*l/self.n)*100
-        gl = (1-1.0*g/self.n)*100
-        f.write("\n{e},{l},{g},|,{m},{n},{o},{sn},{sc},|,{el},{ll},{gl},|init,{ei},{li},{gi}"\
+        f.write("\n{e},{l},{g},|,{m},{n},{o},{sn},{sc},|,{el},{ll},{gl},|init,{ei},{li},{gi},|rDS,{rds}"\
                 .format(e=e,l=l,g=g,\
-                        m=self.m,n=self.n,o=self.offP,sn=self.shutN,sc=self.shutC,\
+                        m=self.m,n=self.n,o=self.offP,sn=self.shutN,sc=self.shutC,rds=self.rDS,\
                         el=el,ll=ll,gl=gl,ei=edf[1],li=llf[1],gi=ga[1]))
         f.close()
 
