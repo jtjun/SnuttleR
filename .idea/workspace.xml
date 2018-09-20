@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1e469ce9-2a24-4ed2-8555-66e9cadb6a8e" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/RequestGenerator.py" beforeDir="false" afterPath="$PROJECT_DIR$/RequestGenerator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Simulator.py" beforeDir="false" afterPath="$PROJECT_DIR$/Simulator.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/result/result.csv" beforeDir="false" afterPath="$PROJECT_DIR$/result/result.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/result/test EDF 0 Whole Trips.png" beforeDir="false" afterPath="$PROJECT_DIR$/result/test EDF 0 Whole Trips.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/result/test GA 0 Whole Trips.png" beforeDir="false" afterPath="$PROJECT_DIR$/result/test GA 0 Whole Trips.png" afterDir="false" />
@@ -17,15 +17,15 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/SnuttleR$Simulator.coverage" NAME="Simulator Coverage Results" MODIFIED="1537455719508" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/SnuttleR$Simulator.coverage" NAME="Simulator Coverage Results" MODIFIED="1537457752672" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="Simulator.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Simulator.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Simulator.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="315">
-              <caret line="190" column="41" lean-forward="true" selection-start-line="190" selection-start-column="41" selection-end-line="190" selection-end-column="41" />
+            <state relative-caret-position="341">
+              <caret line="184" column="40" lean-forward="true" selection-start-line="184" selection-start-column="40" selection-end-line="184" selection-end-column="40" />
               <folding>
                 <element signature="e#0#37#0" expanded="true" />
               </folding>
@@ -36,17 +36,17 @@
       <file leaf-file-name="RequestGenerator.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/RequestGenerator.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="576">
-              <caret line="207" column="25" lean-forward="true" selection-start-line="207" selection-start-column="25" selection-end-line="207" selection-end-column="25" />
+            <state relative-caret-position="501">
+              <caret line="202" column="15" lean-forward="true" selection-start-line="202" selection-start-column="15" selection-end-line="202" selection-end-column="15" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="result.csv" pinned="false" current-in-tab="false">
+      <file leaf-file-name="result.csv" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/result/result.csv">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="583">
-              <caret line="56" column="51" selection-start-line="56" selection-start-column="51" selection-end-line="56" selection-end-column="51" />
+            <state relative-caret-position="388">
+              <caret line="39" column="37" lean-forward="true" selection-start-line="39" selection-start-column="37" selection-end-line="39" selection-end-column="37" />
             </state>
           </provider>
         </entry>
@@ -110,9 +110,9 @@
         <option value="$PROJECT_DIR$/DataGenerator.py" />
         <option value="$PROJECT_DIR$/GAOperator.py" />
         <option value="$PROJECT_DIR$/MapGenerator.py" />
-        <option value="$PROJECT_DIR$/result/result.csv" />
-        <option value="$PROJECT_DIR$/RequestGenerator.py" />
         <option value="$PROJECT_DIR$/Simulator.py" />
+        <option value="$PROJECT_DIR$/RequestGenerator.py" />
+        <option value="$PROJECT_DIR$/result/result.csv" />
       </list>
     </option>
   </component>
@@ -219,7 +219,7 @@
       <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="8" />
       <window_info anchor="bottom" id="Python Console" order="11" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49940476" visible="true" weight="0.28557113" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49940476" weight="0.28557113" />
       <window_info anchor="bottom" id="Terminal" order="10" />
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25" />
       <window_info anchor="right" id="R Packages" order="6" />
@@ -428,27 +428,27 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/result/result.csv">
+    <entry file="file://$PROJECT_DIR$/Simulator.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="583">
-          <caret line="56" column="51" selection-start-line="56" selection-start-column="51" selection-end-line="56" selection-end-column="51" />
+        <state relative-caret-position="341">
+          <caret line="184" column="40" lean-forward="true" selection-start-line="184" selection-start-column="40" selection-end-line="184" selection-end-column="40" />
+          <folding>
+            <element signature="e#0#37#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/RequestGenerator.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="576">
-          <caret line="207" column="25" lean-forward="true" selection-start-line="207" selection-start-column="25" selection-end-line="207" selection-end-column="25" />
+        <state relative-caret-position="501">
+          <caret line="202" column="15" lean-forward="true" selection-start-line="202" selection-start-column="15" selection-end-line="202" selection-end-column="15" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Simulator.py">
+    <entry file="file://$PROJECT_DIR$/result/result.csv">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="315">
-          <caret line="190" column="41" lean-forward="true" selection-start-line="190" selection-start-column="41" selection-end-line="190" selection-end-column="41" />
-          <folding>
-            <element signature="e#0#37#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="388">
+          <caret line="39" column="37" lean-forward="true" selection-start-line="39" selection-start-column="37" selection-end-line="39" selection-end-column="37" />
         </state>
       </provider>
     </entry>

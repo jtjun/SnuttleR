@@ -204,5 +204,5 @@ class RequestGenerator() :
         for r in self.requests:
             d = self.dists[r[1]][r[3]]
             dt = r[2]-r[0]
-            sum += 1.0*d/dt
+            sum += 1.0*dt/d
         return sum/self.n
