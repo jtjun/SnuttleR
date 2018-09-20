@@ -186,9 +186,9 @@ class Simulator:
     def saving(self, edf, llf, ga):
         e, l, g = edf[0], llf[0], ga[0]
         f = open("./result/result.csv", 'a')
-        el = (e/g)*100
-        ll = (l/g)*100
-        gl = 100
+        el = (1-1.0*e/self.n)*100
+        ll = (1-1.0*l/self.n)*100
+        gl = (1-1.0*g/self.n)*100
         f.write("\n{e},{l},{g},|,{m},{n},{o},{sn},{sc},|,{el},{ll},{gl},|init,{ei},{li},{gi}"\
                 .format(e=e,l=l,g=g,\
                         m=self.m,n=self.n,o=self.offP,sn=self.shutN,sc=self.shutC,\
