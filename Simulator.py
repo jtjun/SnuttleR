@@ -55,13 +55,14 @@ class Simulator:
             if typ == 'LLF' : schedule = self.DG.generateLLF(schedule, 0, True)
             if typ == 'GA' : schedule = self.GAINIT(True)
             self.report(schedule, typ + ' off ' + str(numm))
-            return len(schedule.rejects)
+            return [len(schedule.rejects), 0]
 
         # initialize schedule
         requestsT = list(filter(lambda r: r[4] < 0, requests))
         if typ == 'EDF' : schedule = self.DG.generateEDF(schedule, 0)
         if typ == 'LLF' : schedule = self.DG.generateLLF(schedule, 0)
         if typ == 'GA' : schedule = self.GAINIT(False)
+        inRjs = len(schedule.rejects)
 
         # time is ticking
         for t in range(1, self.T) :
@@ -113,7 +114,7 @@ class Simulator:
             else: continue  # there are no new requests
 
             # online processing if there are new requests
-            if typ in ['EDF', 'LLF']:
+            if typ in ['empty']:
                 for shuttle in schedule.shuttles :
                     shuttle.trip = self.haveToGo(shuttle)[:]
                     # now all shuttles has only 'have to go'
@@ -125,7 +126,7 @@ class Simulator:
         # time ticking is done
         self.late = late
         self.report(schedule, typ+' '+str(numm))
-        return len(schedule.rejects)
+        return [len(schedule.rejects), inRjs]
 
     def haveToGo(self, shuttle) :
         ntrip = []
@@ -182,14 +183,16 @@ class Simulator:
         V.drawTrips(self.MG, self.RG, schedule, 'test '+str(numm))
         print('_____________________\n')
 
-    def saving(self, e, l, g):
+    def saving(self, edf, llf, ga):
+        e, l, g = edf[0], llf[0], ga[0]
         f = open("./result/result.csv", 'a')
-        el = (1-1.0*e/l)*100
-        gl = (1-1.0*g/l)*100
-        f.write("\n{e},{l},{g},|,{m},{n},{o},{sn},{sc},|,{el},{ll},{gl}"\
+        el = (e/g)*100
+        ll = (l/g)*100
+        gl = 100
+        f.write("\n{e},{l},{g},|,{m},{n},{o},{sn},{sc},|,{el},{ll},{gl},|init,{ei},{li},{gi}"\
                 .format(e=e,l=l,g=g,\
                         m=self.m,n=self.n,o=self.offP,sn=self.shutN,sc=self.shutC,\
-                        el=el,ll=0,gl=gl))
+                        el=el,ll=ll,gl=gl,ei=edf[1],li=llf[1],gi=ga[1]))
         f.close()
 
 if __name__ == "__main__":
@@ -201,4 +204,4 @@ if __name__ == "__main__":
         llf = S.__main__(0, 'LLF', off)
         ga = S.__main__(0, 'GA', off)
         S.saving(edf,llf,ga)
-        print('EDF : {e} | LLF : {l} | GA : {g}'.format(e = edf, l=llf, g=ga))
+        print('EDF : {e} | LLF : {l} | GA : {g}'.format(e = edf[0], l=llf[0], g=ga[0]))
