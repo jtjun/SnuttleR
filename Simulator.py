@@ -211,7 +211,7 @@ class Simulator:
         f.close()
 
 if __name__ == "__main__":
-    n = 1
+    n = 5
     off = False
     for i in range(n) :
         S = Simulator(MapType='clust', ReqType='CS2')

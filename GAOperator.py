@@ -79,11 +79,11 @@ class GAOperator:
                 # Optimization
                 for j in range(Ngene):
                     if DG.getCostGA(self.genes[j]) < INF:
-                        # genejOpt = self.optimize(copy.deepcopy(self.genes[j]))
-                        # if self.chromoAble(genejOpt) :
-                        #    print("OPT is influential")
-                        #    self.genes[j] = genejOpt
-                        # No influence of optimize function
+                        genejOpt = self.optimize(copy.deepcopy(self.genes[j]))
+                        if self.chromoAble(genejOpt) :
+                            print("OPT is influential")
+                            self.genes[j] = genejOpt
+
                         genejOpt = self.optimization(copy.deepcopy(self.genes[j]))
                         if self.chromoAble(genejOpt) : self.genes[j] = genejOpt
                         genejOpt = self.ropti(copy.deepcopy(self.genes[j]))
