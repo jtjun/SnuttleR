@@ -1,6 +1,7 @@
 from DataGenerator import DataGenerator
 from Chromosome import Chromosome
 from Schedule import Schedule
+from Shuttle import Shuttle
 import math
 import random
 import copy
@@ -12,6 +13,9 @@ class GAOperator:
         self.normR = normR
         self.onlR = onlR
         self.offRs = DG.offRs
+        self.chromoAble = DG.chromoAble
+        self.depot = DG.depot
+        self.localOpt = DG.localOpt
 
         Ngene = 1000 # the number of genes
         Nggene = 20 # the number of genes which can survive
@@ -50,6 +54,7 @@ class GAOperator:
         else :
             print('*Processing offline requests in GA* (online : {})'.format(self.onlR))
             print('{} : initial'.format(len(self.genes[0].rejects)))
+            best = copy.deepcopy(self.genes[0])
             for i in range(Nstep):
 
                 print("step {idx} is running".format(idx = i+1))
@@ -73,7 +78,13 @@ class GAOperator:
                 # Optimization
                 for j in range(Ngene):
                     if DG.getCostGA(self.genes[j]) < INF:
-                        self.genes[j] = self.optimize(self.genes[j], DG)
+                        # genejOpt = self.optimize(copy.deepcopy(self.genes[j]), DG)
+                        # if self.chromoAble(genejOpt) :
+                        #    print("OPT is influential")
+                        #    self.genes[j] = genejOpt
+                        # No influence of optimize function
+                        genejOpt = self.optimization(copy.deepcopy(self.genes[j]))
+                        if self.chromoAble(genejOpt) : self.genes[j] = genejOpt
 
                 self.genes.sort(key = lambda gene : DG.getCostGA(gene))
 
@@ -83,7 +94,12 @@ class GAOperator:
                             break
                         del self.genes[j]
 
+                # *check chromoAble at here!
+                if (len(best.rejects) < len(self.genes[0].rejects)) :
+                    self.genes[0] = copy.deepcopy(best)
+                else : best = copy.deepcopy(self.genes[0])
                 self.costs.append(DG.getCostGA(self.genes[0]))
+
                 if(self.costs[i] > self.costs[i+1]) :
                     print("{}% improved | {}".format((1-(self.costs[i+1]/self.costs[i]))*100, len(self.genes[0].rejects)))
 
@@ -102,8 +118,10 @@ class GAOperator:
         print("{}% improved".format((1-(self.costs[len(self.costs)-1]/self.costs[0]))*100))
         print('\nInit: ')
         print(self.init)
+        print(self.chromoAble(self.init))
         print('\nResult : ')
         print(self.genes[0])
+        print(self.chromoAble(self.genes[0]))
         pass
 
     def __str__(self):
@@ -126,8 +144,30 @@ class GAOperator:
                     break
         return Chromosome(self.offRs, trips)
 
+    def optimization(self, chromo):
+        shuttles = []
+        for trip in chromo.trips :
+            shut = Shuttle(self.depot, trip, [])
+            shuttles.append(shut)
+        sche = self.localOpt(shuttles, 0, chromo.rejects)
+        return self.scheToChromo(sche)
+
     def getResult(self):
         return self.genes[0].trips
 
     def getRejs(self):
         return self.genes[0].rejects
+
+    def chromoToSche(self, chromo):
+        shuttles =[]
+        for trip in chromo.trips:
+            shuttle = Shuttle(self.depot, trip, [])
+            shuttles.append(shuttle)
+        return Schedule(shuttles, chromo.rejects)
+
+    def scheToChromo(self, sche):
+        trips = []
+        for shuttle in sche.shuttles:
+            trip = shuttle.trip
+            trips.append(trip)
+        return Chromosome(self.offRs, trips)

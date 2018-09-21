@@ -45,7 +45,7 @@ class DataGenerator:
                     ct[i].append(0)
                 else:
                     trip = self.subL(self.L, [i + 1, j + 1])
-                    if self.available(trip): ct[i].append(1)
+                    if self.availableCT(trip): ct[i].append(1)
                     else: ct[i].append(-1)
         return ct
 
@@ -67,7 +67,7 @@ class DataGenerator:
                 return False
         return True
 
-    def available(self, trip):
+    def availableCT(self, trip):
         ts, stas, l, i = [], [], 0, 0
         for r in trip:
             ra = abs(r)
@@ -91,6 +91,10 @@ class DataGenerator:
 
             i += 1
         return True
+
+    def available(self, trip):
+        shut = Shuttle(self.depot, trip, [], 0)
+        return self.shuttleAbleS(shut)[0]
 
     def checkAble(self, shuttle):
         trip = shuttle.before + shuttle.trip
@@ -179,8 +183,8 @@ class DataGenerator:
 
                 if trip[i + 1] < 0:
                     if ts[i + 1] < at:
-                        #return False
-                        ats.append(at)
+                        return  2.0 * chromo.reqN
+                        # not available trip
                     else:
                         ats.append(at)
 
@@ -419,7 +423,7 @@ class DataGenerator:
                         schedule.rejects.append(r)
 
         # optimize
-        return self.localOpt(routes, t, schedule)
+        return self.localOpt(routes, t, schedule.rejects)
 
     # _______________________LLF_________________________
     def generateLLF(self, schedule, t, off=False): # EDF with Maximize Slack Time
@@ -480,7 +484,7 @@ class DataGenerator:
                     schedule.rejects.remove(r)
 
         # optimize
-        return self.localOpt(routes, t, schedule)
+        return self.localOpt(routes, t, schedule.rejects)
 
     # _______________________GA_________________________
     def generateGA(self, schedule, t, off=False): # Genetic Algorithm
@@ -539,11 +543,11 @@ class DataGenerator:
                     schedule.rejects.remove(r)
 
         # optimize
-        return self.localOpt(routes, t, schedule)
+        return self.localOpt(routes, t, schedule.rejects)
 
-    def localOpt(self, routes, t, schedule):
+    def localOpt(self, routes, t, rejects):
         routes = self.optimize(routes, t)
-        schedule = Schedule(routes, schedule.rejects)
+        schedule = Schedule(routes, rejects)
         for r in schedule.rejects:
             for i in range(len(schedule.shuttles)):
                 k = self.insert(schedule.shuttles[i], r, t)

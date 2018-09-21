@@ -26,7 +26,7 @@ class Chromosome:
             .format(w = self.reqN, a = len(wholetrip)//2, r = len(self.rejects),rr = len(self.rejects)/self.reqN)
         for idx, trip in enumerate(self.trips):
             ret += "Shuttle {i}: {t}\n".format(i = idx, t = trip)
-        ret += "Rejected: {r}\n".format(r = self.rejects)
+        ret += "Rejected: {r}".format(r = self.rejects)
         return ret
 
     def mutation(self, x, y): # change position of request x and request y

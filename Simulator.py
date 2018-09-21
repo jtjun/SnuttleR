@@ -127,7 +127,8 @@ class Simulator:
 
         # time ticking is done
         self.late = late
-        self.report(schedule, typ+' '+str(numm))
+        warring = self.report(schedule, typ+' '+str(numm))
+        if warring > 0 : return [self.n, inRjs]
         return [len(schedule.rejects), inRjs]
 
     def haveToGo(self, shuttle) :
@@ -190,6 +191,7 @@ class Simulator:
         V = Visualization()
         V.drawTrips(self.MG, self.RG, schedule, 'test '+str(numm))
         print('_____________________\n')
+        return warring
 
     def saving(self, edf, llf, ga):
         e, l, g = edf[0], llf[0], ga[0]
@@ -198,7 +200,7 @@ class Simulator:
         gl = (1 - 1.0 * g / self.n) * 100
 
         f = open("./result/result.csv", 'a')
-        f.write("\n{e},{l},{g},|,{m},{n},{o},{sn},{sc},|,{el},{ll},{gl},|init,{ei},{li},{gi},|rDS,{rds}"\
+        f.write("\n{e},{l},{g},|,{m},{n},{o},{sn},{sc},|,{el},{ll},{gl},|init,{ei},{li},{gi},{rds}"\
                 .format(e=e,l=l,g=g,\
                         m=self.m,n=self.n,o=self.offP,sn=self.shutN,sc=self.shutC,rds=self.rDS,\
                         el=el,ll=ll,gl=gl,ei=edf[1],li=llf[1],gi=ga[1]))
