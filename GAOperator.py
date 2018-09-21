@@ -128,3 +128,6 @@ class GAOperator:
 
     def getResult(self):
         return self.genes[0].trips
+
+    def getRejs(self):
+        return self.genes[0].rejects

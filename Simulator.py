@@ -10,7 +10,7 @@ from Shuttle import Shuttle
 class Simulator:
     # as time goes by simulate situation
     def __init__(self, m = 20, n = 100, T = 1000, shutN = 10, shutC = 5, offP = 0.6, \
-                 MapType = 'clust', ReqType = 'CS2', gaN = 9, upp = False):
+                 MapType = 'clust', ReqType = 'CS2', gaN = 10, upp = False):
         self.m = m  # number of stations
         self.n = n  # number of requests
         self.shutN = shutN  # number of shuttles
@@ -39,11 +39,12 @@ class Simulator:
         onlR = int(self.n*(1-self.offP))
         GAOP = GAOperator(self.DG, 0, onlR, self.gaN, off)
         trips = GAOP.getResult()
+        rejs = GAOP.getRejs()
         shuttles =[]
         for trip in trips:
             shuttle = Shuttle(self.MG.depot, trip, [], 0)
             shuttles.append(shuttle)
-        return Schedule(shuttles)
+        return Schedule(shuttles, rejs)
 
     def __main__(self, numm, typ, off): # when call the main, new schedule is generated
         requests = self.requests[:]
@@ -148,11 +149,16 @@ class Simulator:
         return ntrip
 
     def report(self, schedule, numm):
+        warring = 0
         print('_______schedule______')
         print(numm)
         print(len(schedule.shuttles))
         for shuttle in schedule.shuttles :
-            print(shuttle.before, shuttle.trip, self.DG.checkAble(shuttle))
+            shutable = self.DG.checkAble(shuttle)
+            print(shuttle.before, shuttle.trip, shutable)
+            if not shutable :
+                print("ERROR : *This Shuttle is NOT serviceable.*")
+                warring += 1
         if self.DG.getCost(schedule) >= 2.0*self.n :
             print('ERROR : 0.01:duplicate / 1.0:index {}'.format(self.DG.getCost(schedule)))
             print('_____________________\n')
@@ -179,6 +185,7 @@ class Simulator:
         print('shutN {} / serv {} |non {} |left {} |late {}'.format(len(schedule.shuttles), len(serviced), len(non), len(left), len(self.late)))
         print('Reject')
         print('{lr} {r}'.format(r = schedule.rejects, lr = len(schedule.rejects)))
+        if warring > 0 : print("ERROR{} : There are {} Shuttles which is NOT serviceable*".format(warring, warring))
 
         V = Visualization()
         V.drawTrips(self.MG, self.RG, schedule, 'test '+str(numm))

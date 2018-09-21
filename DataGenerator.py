@@ -127,8 +127,7 @@ class DataGenerator:
             elif dest < 0:  # drop off
                 if destTime < t : # shuttle late for drop off
                     return [False, 0]
-                else : # shuttle not late / don't care
-                    slack += (destTime - t)
+                # else : # shuttle not late / don't care
 
         if t == t0 : t0 -= 1
         return [True, slack/(t-t0)]
@@ -420,26 +419,7 @@ class DataGenerator:
                         schedule.rejects.append(r)
 
         # optimize
-        routes = self.optimize(routes, t)
-        schedule = Schedule(routes, schedule.rejects)
-        for r in schedule.rejects:
-            for i in range(len(schedule.shuttles)):
-                k = self.insert(schedule.shuttles[i], r, t)
-                if k != schedule.shuttles[i].trip:
-                    schedule.shuttles[i].trip = k[:]
-                    break
-
-        schedule = Schedule(schedule.shuttles[:], schedule.rejects[:])
-        idx = 0
-        while len(schedule.shuttles) < self.shutN:
-            if idx >= len(schedule.rejects): break
-            r = schedule.rejects[idx]
-            shuttle = Shuttle(self.depot, [r, -r], [], t)
-            if self.shuttleAbleS(shuttle)[0]:
-                schedule.shuttles.append(shuttle)
-            idx += 1
-
-        return Schedule(schedule.shuttles[:], schedule.rejects[:])
+        return self.localOpt(routes, t, schedule)
 
     # _______________________LLF_________________________
     def generateLLF(self, schedule, t, off=False): # EDF with Maximize Slack Time
@@ -500,26 +480,7 @@ class DataGenerator:
                     schedule.rejects.remove(r)
 
         # optimize
-        routes = self.optimize(routes, t)
-        schedule = Schedule(routes, schedule.rejects)
-        for r in schedule.rejects:
-            for i in range(len(schedule.shuttles)):
-                k = self.insert(schedule.shuttles[i], r, t)
-                if k != schedule.shuttles[i].trip:
-                    schedule.shuttles[i].trip = k[:]
-                    break
-
-        schedule = Schedule(schedule.shuttles[:], schedule.rejects[:])
-        idx = 0
-        while len(schedule.shuttles) < self.shutN:
-            if idx >= len(schedule.rejects): break
-            r = schedule.rejects[idx]
-            shuttle = Shuttle(self.depot, [r, -r], [], t)
-            if self.shuttleAbleS(shuttle)[0]:
-                schedule.shuttles.append(shuttle)
-            idx += 1
-
-        return Schedule(schedule.shuttles[:], schedule.rejects[:])
+        return self.localOpt(routes, t, schedule)
 
     # _______________________GA_________________________
     def generateGA(self, schedule, t, off=False): # Genetic Algorithm
@@ -578,6 +539,9 @@ class DataGenerator:
                     schedule.rejects.remove(r)
 
         # optimize
+        return self.localOpt(routes, t, schedule)
+
+    def localOpt(self, routes, t, schedule):
         routes = self.optimize(routes, t)
         schedule = Schedule(routes, schedule.rejects)
         for r in schedule.rejects:
@@ -590,7 +554,7 @@ class DataGenerator:
         schedule = Schedule(schedule.shuttles[:], schedule.rejects[:])
         idx = 0
         while len(schedule.shuttles) < self.shutN:
-            if idx >= len(schedule.rejects) : break
+            if idx >= len(schedule.rejects): break
             r = schedule.rejects[idx]
             shuttle = Shuttle(self.depot, [r, -r], [], t)
             if self.shuttleAbleS(shuttle)[0]:
