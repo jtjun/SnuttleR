@@ -16,6 +16,7 @@ class GAOperator:
         self.chromoAble = DG.chromoAble
         self.depot = DG.depot
         self.localOpt = DG.localOpt
+        self.mergeTrips = DG.mergeTrips
 
         Ngene = 1000 # the number of genes
         Nggene = 20 # the number of genes which can survive
@@ -69,7 +70,7 @@ class GAOperator:
 
                 # Mutation
                 for j in range(Nggene, Ngene):
-                    if random.random() < 0.15:
+                    if random.random() < 0.30:
                         i1 = random.randrange(DG.n) + 1
                         # i2 = random.randrange(DG.m) + 1
                         i2 = DG.getSimilarRequest(i1 - 1) + 1
@@ -78,13 +79,15 @@ class GAOperator:
                 # Optimization
                 for j in range(Ngene):
                     if DG.getCostGA(self.genes[j]) < INF:
-                        # genejOpt = self.optimize(copy.deepcopy(self.genes[j]), DG)
+                        # genejOpt = self.optimize(copy.deepcopy(self.genes[j]))
                         # if self.chromoAble(genejOpt) :
                         #    print("OPT is influential")
                         #    self.genes[j] = genejOpt
                         # No influence of optimize function
                         genejOpt = self.optimization(copy.deepcopy(self.genes[j]))
                         if self.chromoAble(genejOpt) : self.genes[j] = genejOpt
+                        genejOpt = self.ropti(copy.deepcopy(self.genes[j]))
+                        if self.chromoAble(genejOpt): self.genes[j] = genejOpt
 
                 self.genes.sort(key = lambda gene : DG.getCostGA(gene))
 
@@ -116,6 +119,7 @@ class GAOperator:
             else :
                 print("%f %d th" %(self.costs[i], i))
         print("{}% improved".format((1-(self.costs[len(self.costs)-1]/self.costs[0]))*100))
+
         print('\nInit: ')
         print(self.init)
         print(self.chromoAble(self.init))
@@ -127,18 +131,18 @@ class GAOperator:
     def __str__(self):
         pass
 
-    def optimize(self, chromo, DG):
+    def optimize(self, chromo):
         trips = copy.deepcopy(chromo.trips)
         for i in range(len(trips)-1, -1, -1):
             for j in range(i):
-                k = DG.mergeTrips(trips[j], trips[i])
+                k = self.mergeTrips(trips[j], trips[i])
                 if k != None:
                     trips[j] = k[:]
                     del trips[i]
                     break
         for r in chromo.rejects:
             for i in range(len(trips)):
-                k = DG.mergeTrips(trips[i], [r, -r])
+                k = self.mergeTrips(trips[i], [r, -r])
                 if k != None:
                     trips[i] = k[:]
                     break
@@ -151,6 +155,16 @@ class GAOperator:
             shuttles.append(shut)
         sche = self.localOpt(shuttles, 0, chromo.rejects)
         return self.scheToChromo(sche)
+
+    def ropti(self, chromo):
+        trips = copy.deepcopy(chromo.trips)
+        for r in chromo.rejects:
+            for i in range(len(trips)):
+                k = self.mergeTrips(trips[i], [r, -r])
+                if k != None:
+                    trips[i] = k[:]
+                    break
+        return Chromosome(self.offRs, trips)
 
     def getResult(self):
         return self.genes[0].trips

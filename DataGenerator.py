@@ -6,7 +6,7 @@ import copy
 
 
 class DataGenerator:
-    def __init__(self, MG, RG, shutN, gaN):
+    def __init__(self, MG, RG, shutN, gaN, lP = 0):
         self.MG = MG
         self.dists = MG.dists
         self.depot = MG.depot
@@ -17,6 +17,7 @@ class DataGenerator:
         self.T = RG.T
         self.shutN = shutN
         self.gaN = gaN
+        self.lP = lP # acceptable Late time Policy
 
         requests = list(enumerate(self.requests))
         self.L = self.makeL(requests)
@@ -130,7 +131,9 @@ class DataGenerator:
 
             elif dest < 0:  # drop off
                 if destTime < t : # shuttle late for drop off
-                    return [False, 0]
+                    late = t-destTime
+                    if late > self.lP : return [False, 0]
+                    else : slack -= late
                 # else : # shuttle not late / don't care
 
         if t == t0 : t0 -= 1

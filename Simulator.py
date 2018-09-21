@@ -10,7 +10,7 @@ from Shuttle import Shuttle
 class Simulator:
     # as time goes by simulate situation
     def __init__(self, m = 20, n = 100, T = 1000, shutN = 10, shutC = 5, offP = 0.6, \
-                 MapType = 'clust', ReqType = 'CS2', gaN = 10, upp = False):
+                 MapType = 'clust', ReqType = 'CS2', gaN = 10, upp = False, lP = 0):
         self.m = m  # number of stations
         self.n = n  # number of requests
         self.shutN = shutN  # number of shuttles
@@ -18,16 +18,19 @@ class Simulator:
         self.shutC = shutC # capacity of shuttle
         self.offP = offP # ratio of offline requests
         self.gaN = gaN # number of GA steps
+        self.upp = upp # convert dists to upper bound
+        self.lP = lP # acceptable Late time Policy
 
-        self.MG = MapGenerator(self.m, MapType, upp)
+        self.MG = MapGenerator(self.m, MapType, self.upp)
         self.RG = RequestGenerator(self.MG, ReqType, self.n, self.T, self.offP)
-        self.DG = DataGenerator(self.MG, self.RG, shutN, gaN)
+        self.DG = DataGenerator(self.MG, self.RG, self.shutN, self.gaN, self.lP)
         self.requests = self.RG.requests[:]
 
         print(self.MG)
         print(self.RG)
         print('Stations : {m} | Requests : {r} | Shuttles : {s}\nTime : {t} | Off proportion : {o} | Capacity : {c}\n'\
               .format(m=self.m, r=self.n, s=self.shutN, t=self.T, o=self.offP, c=self.shutC))
+        print('------------------------------------')
         self.rDS = self.RG.rDS()
         pass
 
@@ -65,6 +68,7 @@ class Simulator:
         if typ == 'LLF' : schedule = self.DG.generateLLF(schedule, 0)
         if typ == 'GA' : schedule = self.GAINIT(False)
         inRjs = len(schedule.rejects)
+        print("{}'s initial {}".format(typ, inRjs))
 
         # time is ticking
         for t in range(1, self.T) :
@@ -207,7 +211,7 @@ class Simulator:
         f.close()
 
 if __name__ == "__main__":
-    n = 10
+    n = 1
     off = False
     for i in range(n) :
         S = Simulator(MapType='clust', ReqType='CS2')
@@ -215,4 +219,4 @@ if __name__ == "__main__":
         llf = S.__main__(0, 'LLF', off)
         ga = S.__main__(0, 'GA', off)
         S.saving(edf,llf,ga)
-        print('EDF : {e} | LLF : {l} | GA : {g}'.format(e = edf[0], l=llf[0], g=ga[0]))
+        print('EDF : {e} | LLF : {l} | GA : {g}\n'.format(e = edf[0], l=llf[0], g=ga[0]))
