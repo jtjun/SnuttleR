@@ -203,7 +203,7 @@ class Simulator:
         ll = (1 - 1.0 * l / self.n) * 100
         gl = (1 - 1.0 * g / self.n) * 100
 
-        f = open("./result/result.csv", 'a')
+        f = open("../result/result.csv", 'a')
         f.write("\n{e},{l},{g},|,{m},{n},{o},{sn},{sc},|,{el},{ll},{gl},|init,{ei},{li},{gi},{rds}"\
                 .format(e=e,l=l,g=g,\
                         m=self.m,n=self.n,o=self.offP,sn=self.shutN,sc=self.shutC,rds=self.rDS,\
