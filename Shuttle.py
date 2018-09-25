@@ -3,20 +3,23 @@ import copy
 import math
 
 class Shuttle:
-    # trip : an array of requests in order of visits (positive value: ride, negative value: drop off)
+    # trip : an array of requests in order of visits
+    # (positive value: pick up, negative value: drop off)
     # trip[k] != 0, abs(trip[k]) > 0
+    # before := serviced requests
+    # after := will servicing
     # location : (x, y) tuple
-    def __init__(self, loc, trip, before, t = 0):
+
+    def __init__(self, loc, after, before, t = 0):
         self.loc = loc
-        self.trip = trip
-        # : trip[0] is always next destination
-        # ie. every tick cut the trip by t
         self.before = before
+        self.after = after
+        self.trip = before[:] + after[:]
         self.t = t
 
     def __str__(self):
         ret = ""
-        ret += str(self.loc) +' '+ str(self.trip)
+        ret += str(self.before) + str(self.loc) +' '+ str(self.after)
         return ret
 
     def __eq__(self, other):

@@ -5,6 +5,11 @@ class MapGenerator:
     # m : the number of stations
     # stations : locations of stations [tuple of 2 real numbers and name (x, y, name)] == map info
     # dists : matrix which has the distance info
+    # depot : middle spot of map // all shuttles start at here
+    # all roads are parallel whit x, y axis
+
+    # *rewrite the code for road *
+
     def __init__(self, m = 20, typ = 'nomal', upp = True):
         self.m = m
         if typ == 'nomal' :
