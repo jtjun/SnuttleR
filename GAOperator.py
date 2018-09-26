@@ -177,7 +177,7 @@ class GAOperator:
         shuttles = copy.deepcopy(gene.shuttles)
         for r in gene.rejects:
             for i in range(len(shuttles)):
-                k = self.mergeTrips(shuttles[i].trip,\
+                k = self.mergeTrips(shuttles[i].after,\
                                     [r, -r])
                 if k != None:
                     nshut = Shuttle(shuttles[i].loc, k[:])

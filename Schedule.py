@@ -15,16 +15,16 @@ class Schedule: # using as gene (chromosome)
         self.reqN = len(reqS)
         accepts = []
         for shut in shuttles:
-            accepts += (shut.before+shut.trip)
+            accepts += shut.getTrip()
         self.rejects = list(filter(lambda r : r not in accepts, self.reqS))
         self.rejects.sort()
-        self.shuttles.sort(key = lambda shut : len(shut.trip))
+        self.shuttles.sort(key = lambda shut : len(shut.getTrip()))
         pass
 
     def __str__(self):
         wholetrip = []
         for shuttle in self.shuttles:
-            wholetrip += shuttle.trip
+            wholetrip += shuttle.getTrip()
 
         ret = "--------------------"
         ret += "{w} Accepted: {a}, Rejected: {r}, Reject Ratio: {rr}\n" \
@@ -42,11 +42,8 @@ class Schedule: # using as gene (chromosome)
             return False
         else:
             for i in range(len(self.shuttles)):
-                if len(self.shuttles[i].trip) != len(other.shuttles[i].trip):
+                if self.shuttles[i] != other.shuttles[i]:
                     return False
-                else:
-                    for j in range(len(self.shuttles[i].trip)):
-                        if self.shuttles[i].trip[j] != other.shuttles[i].trip[j]: return False
             return True
 
     def getServiced(self, n):
@@ -54,7 +51,7 @@ class Schedule: # using as gene (chromosome)
         allTrip = []
         for (i, shuttle) in enumerate(self.shuttles) :
             serviced += shuttle.before[:]
-            trip = shuttle.trip
+            trip = shuttle.getTrip()
             allTrip += trip
 
         noPos = []
@@ -100,18 +97,19 @@ class Schedule: # using as gene (chromosome)
         contained = set()
 
         for shut in retshuts:
-            trip = shut.trip
+            trip = shut.getTrip()
             for r in trip:
                 contained.add(r)
 
         for shut in shuts2:
-            tr = list(filter(lambda r: r not in contained, shut.trip))
+            trip = shut.getTrip()
+            tr = list(filter(lambda r: r not in contained, trip))
             if len(tr) > 0:
                 nshut = Shuttle(shut.loc, tr, [], shut.t)
                 retshuts.append(nshut)
 
         if len(retshuts) > 10:
-            retshuts.sort(key=lambda shut: -len(shut.trip))
+            retshuts.sort(key=lambda shut: -len(shut.getTrip()))
             retshuts = retshuts[:10]
 
         return Schedule(retshuts, self.reqS)

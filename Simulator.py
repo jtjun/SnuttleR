@@ -70,10 +70,10 @@ class Simulator:
             # print('{t}\n{s}\n___________________\n'.format(t=t, s=schedule))
             # moving shuttles
             for shuttle in schedule.shuttles :
-                if len(shuttle.trip) <= 0 :
+                if len(shuttle.after) <= 0 :
                     shuttle.moveTo(self.MG.depot, t)
                     continue
-                dest = shuttle.trip[0]
+                dest = shuttle.after[0]
                 destSta = self.requests[abs(dest) - 1][((abs(dest) - dest) // abs(dest))+1]
                 destTime = self.requests[abs(dest) - 1][(abs(dest) - dest) // abs(dest)]
 
@@ -87,41 +87,37 @@ class Simulator:
                             custN = shuttle.getCustomN()
                             if custN >= self.shutC :
                                 print('ERROR : exceed the shuttle capacity {}'.format(custN))
+                                return False
                             shuttle.before.append(dest)
-                            shuttle.trip = shuttle.trip[1:]
+                            shuttle.after = shuttle.after[1:]
                         # else : shuttle not arrived yet
 
                 elif dest < 0 : # drop off
-                    if destTime < t : # shuttle late for drop off
-                        if shuttle.loc == sta : # shuttle arrived anyway
-                            shuttle.before.append(dest)
-                            shuttle.trip = shuttle.trip[1:]
-                            late.append(str(dest)+' late : '+str((t-destTime)))
+                    if shuttle.loc == sta:  # shuttle arrived
+                        shuttle.before.append(dest)
+                        shuttle.after = shuttle.after[1:]
 
-                    if destTime >= t : # shuttle not late
-                        if shuttle.loc == sta : # shuttle arrived well
-                            shuttle.before.append(dest)
-                            shuttle.trip = shuttle.trip[1:]
-                        # else : shuttle not arrived yet
+                        if destTime < t : # shuttle late for drop off
+                            late.append(str(dest)+' late : '+str((t-destTime)))
+                        # else : // destTime >= t shuttle not late
+
+                    # else : shuttle not arrived yet
 
                 else : # dest == 0 : error
                     print("ERROR : Requests is ZERO")
                     return False
 
-            onlNew = False
             # checking there are any new requests
             requestsTemp = list(filter(lambda r: r[4] < t, requests))
             if len(requestsT) < len(requestsTemp):
                 requestsT = requestsTemp
-                onlNew = True
             else: continue  # there are no new requests
 
             # online processing if there are new requests
-            if onlNew :
-                if typ == 'EDF': schedule = self.DG.generateEDF(schedule, t)
-                elif typ == 'LLF': schedule = self.DG.generateLLF(schedule, t)
-                elif typ == 'GA' : schedule = self.DG.generateGA(schedule, t)
-                else : print('ERROR : Simulator type error')
+            if typ == 'EDF': schedule = self.DG.generateEDF(schedule, t)
+            elif typ == 'LLF': schedule = self.DG.generateLLF(schedule, t)
+            elif typ == 'GA' : schedule = self.DG.generateGA(schedule, t)
+            else : print('ERROR : Simulator type error')
 
         # time ticking is done
         self.late = late
@@ -136,14 +132,14 @@ class Simulator:
         print(len(schedule.shuttles))
         for shuttle in schedule.shuttles :
             shutable = self.DG.checkAble(shuttle)
-            print(shuttle.before, shuttle.trip, shutable)
+            print(shuttle.before, shuttle.after, shutable)
             if not shutable :
                 print("ERROR : *This Shuttle is NOT serviceable.*")
                 warring += 1
-        if self.DG.getCost(schedule) >= 2.0*self.reqN :
+        if not self.DG.geneAble(schedule) :
             print('ERROR : {} (0.01:duplicate / 1.0:index)'.format(self.DG.getCost(schedule)))
             print('_____________________\n')
-            return 0
+            #return 0
         print('_____________________\n')
 
         serviced = schedule.getServiced(self.reqN)
@@ -156,7 +152,7 @@ class Simulator:
 
         left = []
         for shuttle in schedule.shuttles :
-            left += shuttle.trip
+            left += shuttle.after
 
         print('{} serviced'.format(serviced))
         print('{} non'.format(non))

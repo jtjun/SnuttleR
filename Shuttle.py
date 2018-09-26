@@ -12,20 +12,21 @@ class Shuttle:
         self.loc = loc
         self.after = after
         self.before = before
-        self.trip = before + after
         self.t = t
 
     def __str__(self):
         ret = ""
-        ret += str(self.loc) + ' ' + str(self.trip)
+        ret += str(self.loc) + ' ' + str(self.getTrip())
         return ret
 
     def __eq__(self, other):
-        if len(self.trip) != len(other.trip):
+        tripi = self.getTrip()
+        tripj = other.getTrip()
+        if len(tripi) != len(tripj):
             return False
         else:
-            for i in range(len(self.trip)):
-                if self.trip[i] != other.trip[i]: return False
+            for i in range(len(self.getTrip())):
+                if tripi[i] != tripj[i]: return False
             return True
 
     def moveTo(self, dest, t):
@@ -48,3 +49,6 @@ class Shuttle:
             else:
                 custN -= 1
         return custN
+
+    def getTrip(self):
+        return self.before + self.after

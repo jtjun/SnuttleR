@@ -50,7 +50,7 @@ class DataGenerator:
                     ct[i].append(0)
                 else:
                     trip = self.subL(self.L, [i + 1, j + 1])
-                    if self.availableCT(trip): ct[i].append(1)
+                    if self.available(trip): ct[i].append(1)
                     else: ct[i].append(-1)
         return ct
 
@@ -59,8 +59,10 @@ class DataGenerator:
         tripSet = []
 
         for shuttle in shuttles:
-            if not self.shuttleAbleS(shuttle)[0] : return False
-            tripSet += shuttle.trip
+            after = shuttle.getTrip()
+            nshuttle = Shuttle(self.depot, after)
+            if not self.shuttleAbleS(nshuttle)[0] : return False
+            tripSet += shuttle.getTrip()
 
         for i in range(self.reqN):
             i += 1
@@ -72,58 +74,34 @@ class DataGenerator:
                 return False
         return True
 
-    def availableCT(self, trip):
-        ts, stas, l, i = [], [], 0, 0
-        for r in trip:
-            ra = abs(r)
-            ts.append(self.requests[ra - 1][(ra - r) // ra])
-            stas.append(self.requests[ra - 1][((ra - r) // ra) + 1])
-            l += 1
-
-        ats = [ts[0]]  # arrival times
-        while i < l - 1:
-            d = self.dists[stas[i]][stas[i + 1]]
-            at = ats[i] + d  # arrival time
-
-            if trip[i + 1] > 0:  # pick up
-                if ts[i + 1] > at: ats.append(ts[i + 1])  # arrival earlier
-                # can calculate slack time at here
-                else: ats.append(at)
-
-            if trip[i + 1] < 0:  # drop off
-                if ts[i + 1] < at: return False  # arrival late
-                else: ats.append(at)
-
-            i += 1
-        return True
-
     def available(self, trip):
         shut = Shuttle(self.depot, trip, [], 0)
         return self.shuttleAbleS(shut)[0]
 
     def checkAble(self, shuttle):
-        trip = shuttle.before + shuttle.trip
+        trip = shuttle.getTrip()
         nshuttle = Shuttle(self.depot, trip, [], 0)
         return self.shuttleAbleS(nshuttle)[0]
 
     def shuttleAbleS(self, shuttle):
-        slack = 0
+        slack = 0 # */ check!!!
         loc = shuttle.loc
-        trip = shuttle.trip[:]
-        for r in trip :
-            if trip.count(r) != 1 : return [False, 0]
+        after = shuttle.after[:]
+
+        for r in after :
+            if after.count(r) != 1 : return [False, 0]
         t = shuttle.t + 0
         t0 = t
 
-        for i in range(len(trip)) :
-            dest = trip[i]
+        for i in range(len(after)) :
+            dest = after[i]
             destSta = self.requests[abs(dest) - 1][((abs(dest) - dest) // abs(dest)) + 1]
             destTime = self.requests[abs(dest) - 1][(abs(dest) - dest) // abs(dest)]
 
             # shuttle arrived next destination
             if i== 0 : t += self.getLocDist(loc, destSta)
             else :
-                depa = trip[i-1]
+                depa = after[i-1]
                 depaSta = self.requests[abs(depa) - 1][((abs(depa) - depa) // abs(depa)) + 1]
                 t += self.dists[depaSta][destSta]
 
@@ -144,28 +122,34 @@ class DataGenerator:
         return [True, slack/(t-t0)]
 
     def getCost(self, schedule):
-        # 2.0*n : impossible Shuttle
+        # 2.0*reqN : impossible Shuttle
         # 1.0 : index_r > index_-r
         # 0.01 : duplicate
+        if not self.geneAble(schedule) :
+            return 2.0*self.reqN
+            # not serviceable shuttle in schedule
+
         totSlack = self.reqN
         reqs = schedule.rejects[:]
         for shuttle in schedule.shuttles :
-            travle = (shuttle.before + shuttle.trip)
+            travle = (shuttle.before + shuttle.getTrip())
             for r in travle :
                 ar = abs(r)
                 if travle.index(ar) >= travle.index(-ar):
+                    # wrong order
                     return 2.0*self.reqN + ar
             reqs += travle
 
             ableS = self.shuttleAbleS(shuttle)
             if not ableS[0] :
+                # not serviceable shuttle in schedule
                 return 2.0*self.reqN
             totSlack += ableS[1]
 
         for r in reqs :
             if reqs.count(r) != 1 :
+                # duplicate
                 return 2.0*self.reqN + 0.01*abs(r)
-
         return len(schedule.rejects) + self.reqN/totSlack
 
     def makeL(self, requests):
@@ -202,7 +186,7 @@ class DataGenerator:
                 idx += 1 # shuttle.before is nonempty
                 continue
 
-            for r in shuttle.trip :
+            for r in shuttle.after :
                 if r < 0 : continue
                 jdx = 0
                 while jdx < l :
@@ -210,37 +194,41 @@ class DataGenerator:
                         jdx += 1
                         continue
                     ntrip = self.insert(shuttles[jdx], r, shutT)
-                    if ntrip == shuttles[jdx].trip :
+                    if ntrip == shuttles[jdx].after :
                         jdx += 1
                         continue # insert is failed
                     else :
-                        shuttles[jdx].trip = copy.deepcopy(ntrip)
-                        shuttle.trip.remove(r)
-                        shuttle.trip.remove(-r)
+                        # insert r to shuttle j
+                        shuttles[jdx].after = copy.deepcopy(ntrip)
+                        shuttle.after.remove(r)
+
+                        # remove r from shuttle i
+                        shuttle.after.remove(-r)
                         mark += [r, -r]
                         break
 
-            if len(mark) == len(shuttle.trip) : # all trip are merged
+            if len(mark) == len(shuttle.after) : # all trip are merged
                 shuttles = shuttles[:idx] + shuttles[idx+1:]
                 shuttlesO = copy.deepcopy(shuttles)
                 l = len(shuttles)
+
             else :
                 shuttles = copy.deepcopy(shuttlesO)
                 idx += 1
+
         return copy.deepcopy(shuttles)
 
     def insert(self, shuttle, x, shutT):
-        tripi = shuttle.trip[:]
+        afteri = shuttle.after[:]
         # add selected request to trip1
-        temp = self.mergeTrips(tripi, [x, -x])
-        if temp == None :
-            return shuttle.trip
+        temp = self.mergeTrips(afteri, [x, -x])
+        if temp == None : # Merge Able
+            return shuttle.after
 
         nshuttle = Shuttle(shuttle.loc, temp, shuttle.before[:], shutT)
-        ableS = self.shuttleAbleS(nshuttle)
-        if ableS[0]:
-            return temp
-        return shuttle.trip
+        if self.shuttleAbleS(nshuttle)[0] :
+            return temp # service able
+        else : return shuttle.after
 
     def mergeTrips(self, trip1, trip2):
         mint1 = [[-1] * (len(trip2) + 1) for i in range(len(trip1) + 1)]
@@ -349,7 +337,7 @@ class DataGenerator:
     def generateEDF(self, schedule, t, off=False):
         already = []
         for shuttle in schedule.shuttles :
-            already += shuttle.trip + shuttle.before
+            already += shuttle.getTrip()
 
         reqs = list(enumerate(self.requests[:]))
         requests = list(filter(lambda req : ((req[0]+1) not in already) and (req[1][4] <= t), reqs))
@@ -363,36 +351,43 @@ class DataGenerator:
             random.shuffle(routes)
             while j < l :
                 shuttle = routes[j]
-                route = shuttle.trip
+                after = shuttle.after[:]
                 mutab = True
-                for rr in route: # checking available
+
+                for rr in after: # checking availability
                     if self.CT[abs(r)-1][abs(rr)-1] < 0:
                         mutab = False
                         break
+
                 if mutab: # Mutually available
-                    temp = route + [r, -r]
-                    tript = self.subL(self.L, temp)
-                    nshuttle = Shuttle(shuttle.loc, tript, shuttle.before[:], t)
+                    aftert = self.subL(self.L, after + [r, -r])
+                    nshuttle = Shuttle(shuttle.loc, aftert, shuttle.before[:], t)
+
                     if self.shuttleAbleS(nshuttle)[0] :
-                        routes[j] = nshuttle
+                        routes[j] = nshuttle # serviceable
                         if r in schedule.rejects :
                             schedule.rejects.remove(r)
                         break # available shuttle
+                    # else : check next shuttle
                 j += 1
 
             if j == l:
                 if len(routes) >= self.shutN :
                     if r not in schedule.rejects :
                         schedule.rejects.append(r)
+                        # r is rejected
+
                 else : # there are new shuttle
                     shuttle = Shuttle(self.depot, [r, -r], [], t)
                     if self.shuttleAbleS(shuttle)[0] :
                         routes.append(shuttle)
                         if r in schedule.rejects:
                             schedule.rejects.remove(r)
+
                     elif r not in schedule.rejects :
                         schedule.rejects.append(r)
 
+                    # else : r is already rejected
         # optimize
         return self.localOpt(routes, t, schedule.rejects)
 
@@ -400,7 +395,7 @@ class DataGenerator:
     def generateLLF(self, schedule, t, off=False): # EDF with Maximize Slack Time
         already = []
         for shuttle in schedule.shuttles :
-            already += shuttle.trip + shuttle.before
+            already += shuttle.getTrip()
 
         reqs = list(enumerate(self.requests[:]))
         requests = list(filter(lambda req : ((req[0]+1) not in already) and (req[1][4] <= t), reqs))
@@ -414,46 +409,55 @@ class DataGenerator:
             j, l = 0, len(routes)
             while j < l :
                 shuttle = routes[j]
-                route = shuttle.trip
+                after = shuttle.after[:]
                 mutab = True
-                for rr in route: # checking available
+
+                for rr in after: # checking availability
                     if self.CT[abs(r)-1][abs(rr)-1] < 0:
                         mutab = False
                         break
+
                 if mutab: # Mutually available
-                    tript = self.subL(self.L, route + [r, -r])
-                    nshuttle = Shuttle(shuttle.loc, tript, shuttle.before[:], t)
+                    aftert = self.subL(self.L, after + [r, -r])
+                    nshuttle = Shuttle(shuttle.loc, aftert, shuttle.before[:], t)
+
                     ableS = self.shuttleAbleS(nshuttle)
                     if ableS[0] :
                         jSlack.append((j, ableS[1]))
+                    # else : check next shuttle
                 j += 1
 
-            if len(jSlack) < 1:
+            if len(jSlack) < 1: # no available shuttle
                 if len(routes) >= self.shutN :
                     if r not in schedule.rejects :
                         schedule.rejects.append(r)
+                        # r is rejected
+
                 else : # there are new shuttle
                     shuttle = Shuttle(self.depot, [r, -r], [], t)
                     if self.shuttleAbleS(shuttle)[0] :
                         routes.append(shuttle)
                         if r in schedule.rejects:
                             schedule.rejects.remove(r)
+
                     elif r not in schedule.rejects :
                         schedule.rejects.append(r)
 
+                    # else : r is already rejected
+
             else : # available, So find Maximum Slack Trip
                 jSlack.sort(key = lambda js : -js[1])
-                j = jSlack[0][0]
-                shuttle = routes[j]
-                route = shuttle.trip
-                tript = self.subL(self.L, route + [r, -r])
+                j = jSlack[0][0] # MST's shuttle number
 
-                nshuttle = Shuttle(shuttle.loc, tript, shuttle.before[:], t)
+                shuttle = routes[j]
+                aftert = self.subL(self.L, shuttle.after + [r, -r])
+                nshuttle = Shuttle(shuttle.loc, aftert, shuttle.before[:], t)
                 routes[j] = nshuttle
 
                 if r in schedule.rejects:
                     schedule.rejects.remove(r)
 
+                # else : r is not rejected before
         # optimize
         return self.localOpt(routes, t, schedule.rejects)
 
@@ -462,7 +466,7 @@ class DataGenerator:
         # GA operating is already done, respect previous schedule
         already = []
         for shuttle in schedule.shuttles:
-            already += (shuttle.trip + shuttle.before)
+            already += shuttle.getTrip()
 
         reqs = list(enumerate(self.requests[:]))
         requests = list(filter(lambda req: ((req[0] + 1) not in already) and (req[1][4] <= t), reqs))
@@ -479,40 +483,49 @@ class DataGenerator:
             j, l = 0, len(routes)
             while j < l:
                 shuttle = routes[j] # different from LLF
-                tript = self.insert(shuttle, r, t)
+                aftert = self.insert(shuttle, r, t)
 
-                if shuttle.trip != tript:  # insert available
-                    nshuttle = Shuttle(shuttle.loc, tript, shuttle.before[:], t)
+                if shuttle.after != aftert:  # insert available
+                    nshuttle = Shuttle(shuttle.loc, aftert, shuttle.before[:], t)
                     ableS = self.shuttleAbleS(nshuttle)
+
                     if ableS[0]:
                         jSlack.append((j, ableS[1]))
+
+                    # else : not serviceable
                 j += 1
 
-            if len(jSlack) < 1:
+            if len(jSlack) < 1: # no available shuttle
                 if len(routes) >= self.shutN:
                     if r not in schedule.rejects:
                         schedule.rejects.append(r)
+                        # r is rejected
+
                 else:  # there are new shuttle
                     shuttle = Shuttle(self.depot, [r, -r], [], t)
                     if self.shuttleAbleS(shuttle)[0]:
                         routes.append(shuttle)
                         if r in schedule.rejects:
                             schedule.rejects.remove(r)
+
                     elif r not in schedule.rejects:
                         schedule.rejects.append(r)
+
+                    # else : r is already rejected
 
             else:  # available, So find Maximum Slack Trip
                 jSlack.sort(key=lambda js: -js[1])
                 j = jSlack[0][0]
                 shuttle = routes[j]
-                tript = self.insert(shuttle, r, t)
+                aftert = self.insert(shuttle, r, t)
 
-                nshuttle = Shuttle(shuttle.loc, tript, shuttle.before[:], t)
+                nshuttle = Shuttle(shuttle.loc, aftert, shuttle.before[:], t)
                 routes[j] = nshuttle
 
                 if r in schedule.rejects:
                     schedule.rejects.remove(r)
 
+                # else : r is not rejected before
         # optimize
         return self.localOpt(routes, t, schedule.rejects)
 
@@ -521,19 +534,24 @@ class DataGenerator:
         schedule = Schedule(routes, rejects)
         for r in schedule.rejects:
             for i in range(len(schedule.shuttles)):
-                k = self.insert(schedule.shuttles[i], r, t)
-                if k != schedule.shuttles[i].trip:
-                    schedule.shuttles[i].trip = k[:]
+                temp = self.insert(schedule.shuttles[i], r, t)
+
+                # insert r to shuttle i
+                if temp != schedule.shuttles[i].after:
+                    schedule.shuttles[i].after =temp[:]
                     break
+                # else : insert failed
 
         schedule = Schedule(schedule.shuttles[:], schedule.rejects[:])
         idx = 0
         while len(schedule.shuttles) < self.shutN:
             if idx >= len(schedule.rejects): break
+
             r = schedule.rejects[idx]
             shuttle = Shuttle(self.depot, [r, -r], [], t)
             if self.shuttleAbleS(shuttle)[0]:
                 schedule.shuttles.append(shuttle)
+            # else : r is rejected
             idx += 1
 
         return Schedule(schedule.shuttles[:], schedule.rejects[:])
