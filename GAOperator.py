@@ -24,11 +24,15 @@ class GAOperator:
 
         self.geneAble = DG.geneAble
         self.depot = DG.depot
-        self.localOpt = DG.localOpt
         self.mergeTrips = DG.mergeTrips
         self.getCost = DG.getCost
         self.getSimilarRequest = DG.getSimilarRequest
         self.shuttleAbleS = DG.shuttleAbleS
+
+        self.localOpt = DG.localOpt
+        self.ropti = DG.ropti
+        self.optimization = DG.optimization
+
         self.Ngene = Ngene  # the size of gene pool
         self.Sgene = Sgene  # the number of genes which can survive
 
@@ -90,11 +94,11 @@ class GAOperator:
                 # Optimization___________
                 for j in range(Ngene):
                     if self.getCost(self.genes[j]) < self.INF:
-                        genejOpt = self.optimize(copy.deepcopy(self.genes[j]))
-                        if self.geneAble(genejOpt): self.genes[j] = genejOpt
                         genejOpt = self.optimization(copy.deepcopy(self.genes[j]))
                         if self.geneAble(genejOpt): self.genes[j] = genejOpt
-                        genejOpt = self.ropti(copy.deepcopy(self.genes[j]))
+                        genejOpt = self.optimiLocal(copy.deepcopy(self.genes[j]))
+                        if self.geneAble(genejOpt): self.genes[j] = genejOpt
+                        genejOpt = self.ropti(copy.deepcopy(self.genes[j]), self.offRs)
                         if self.geneAble(genejOpt): self.genes[j] = genejOpt
 
                 self.genes.sort(key=lambda gene: self.getCost(gene))
@@ -146,55 +150,9 @@ class GAOperator:
     def __str__(self):
         pass
 
-    def optimize(self, gene):
-        shuttles = copy.deepcopy(gene.shuttles)
-        for i in range(len(shuttles) - 1, -1, -1):
-            for j in range(i):
-                k = self.mergeTrips(shuttles[j].after,\
-                                    shuttles[i].after)
-                if k != None:
-                    nshut = Shuttle(shuttles[j].loc, k[:])
-                    shuttles[j] = nshut
-                    del shuttles[i]
-                    break
-
-        for r in gene.rejects:
-            for i in range(len(shuttles)):
-                k = self.mergeTrips(shuttles[i].after,\
-                                    [r, -r])
-                if k != None:
-                    nshut = Shuttle(shuttles[i].loc, k[:])
-                    shuttles[i] = nshut
-                    break
-
-        return Schedule(shuttles, self.offRs)
-
-    def optimization(self, gene):
+    def optimiLocal(self, gene):
         shuttles = copy.deepcopy(gene.shuttles)
         return self.localOpt(shuttles, 0, gene.rejects)
-
-    def ropti(self, gene):
-        shuttles = copy.deepcopy(gene.shuttles)
-        for r in gene.rejects:
-            for i in range(len(shuttles)):
-                k = self.mergeTrips(shuttles[i].after,\
-                                    [r, -r])
-                if k != None:
-                    nshut = Shuttle(shuttles[i].loc, k[:])
-                    shuttles[i] = nshut
-                    break
-
-        rejects = Schedule(shuttles, self.offRs).rejects
-        idx = 0
-        while len(shuttles) < self.shutN :
-            if idx >= len(rejects) : break
-            r = rejects[idx]
-            shut = Shuttle(shuttles[0].loc, [r, -r])
-            if self.shuttleAbleS(shut)[0] :
-                shuttles.append(shut)
-            idx += 1
-
-        return Schedule(shuttles, self.offRs)
 
     def getResult(self):
         return self.genes[0]

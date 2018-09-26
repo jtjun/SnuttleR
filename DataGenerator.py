@@ -115,7 +115,7 @@ class DataGenerator:
                 if destTime < t : # shuttle late for drop off
                     late = t-destTime
                     if late > self.lateP : return [False, 0]
-                    else : slack -= late
+                    else : slack -= late # in late time policy
                 # else : # shuttle not late / don't care
 
         if t == t0 : t0 -= 1
@@ -555,3 +555,51 @@ class DataGenerator:
             idx += 1
 
         return Schedule(schedule.shuttles[:], schedule.rejects[:])
+
+    def optimization(self, gene):
+        shuttles = copy.deepcopy(gene.shuttles)
+        for i in range(len(shuttles) - 1, -1, -1):
+            for j in range(i):
+                k = self.mergeTrips(shuttles[j].after,\
+                                    shuttles[i].after)
+                if k != None:
+                    nshut = Shuttle(shuttles[j].loc, k[:])
+                    shuttles[j] = nshut
+                    del shuttles[i]
+                    break
+
+        for r in gene.rejects:
+            for i in range(len(shuttles)):
+                k = self.mergeTrips(shuttles[i].after,\
+                                    [r, -r])
+                if k != None:
+                    nshut = Shuttle(shuttles[i].loc, k[:])
+                    shuttles[i] = nshut
+                    break
+
+        return Schedule(shuttles, self.offRs)
+
+    def ropti(self, gene, reqS, t=0):
+        shuttles = copy.deepcopy(gene.shuttles)
+        for r in gene.rejects:
+            for i in range(len(shuttles)):
+                k = self.mergeTrips(shuttles[i].after,\
+                                    [r, -r])
+                if k != None:
+                    shut = shuttles[i]
+                    nshut = Shuttle(shut.loc, k[:], shut.before, t)
+                    # if self.shuttleAbleS(nshut)[0] : shuttles[i] = nshut
+                    shuttles[i] = nshut
+                    break
+
+        rejects = Schedule(shuttles, reqS).rejects
+        idx = 0
+        while len(shuttles) < self.shutN :
+            if idx >= len(rejects) : break
+            r = rejects[idx]
+            shut = Shuttle(self.depot, [r, -r], [], t)
+            if self.shuttleAbleS(shut)[0] :
+                shuttles.append(shut)
+            idx += 1
+
+        return Schedule(shuttles, reqS)

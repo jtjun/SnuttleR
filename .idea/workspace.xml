@@ -5,10 +5,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DataGenerator.py" beforeDir="false" afterPath="$PROJECT_DIR$/DataGenerator.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/GAOperator.py" beforeDir="false" afterPath="$PROJECT_DIR$/GAOperator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Schedule.py" beforeDir="false" afterPath="$PROJECT_DIR$/Schedule.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Shuttle.py" beforeDir="false" afterPath="$PROJECT_DIR$/Shuttle.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Simulator.py" beforeDir="false" afterPath="$PROJECT_DIR$/Simulator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Visualization.py" beforeDir="false" afterPath="$PROJECT_DIR$/Visualization.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/result/result.csv" beforeDir="false" afterPath="$PROJECT_DIR$/result/result.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/result/test EDF 0 Whole Trips.png" beforeDir="false" afterPath="$PROJECT_DIR$/result/test EDF 0 Whole Trips.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/result/test GA 0 Whole Trips.png" beforeDir="false" afterPath="$PROJECT_DIR$/result/test GA 0 Whole Trips.png" afterDir="false" />
@@ -22,15 +18,15 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/SnuttleR$Simulator.coverage" NAME="Simulator Coverage Results" MODIFIED="1537957775977" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/SnuttleR$Simulator.coverage" NAME="Simulator Coverage Results" MODIFIED="1537964891297" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file leaf-file-name="Simulator.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Simulator.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="350">
-              <caret line="138" column="41" selection-start-line="138" selection-start-column="41" selection-end-line="138" selection-end-column="41" />
+            <state relative-caret-position="180">
+              <caret line="12" column="60" selection-start-line="12" selection-start-column="60" selection-end-line="12" selection-end-column="60" />
               <folding>
                 <element signature="e#0#37#0" expanded="true" />
               </folding>
@@ -38,23 +34,23 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="DataGenerator.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/DataGenerator.py">
+      <file leaf-file-name="GAOperator.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/GAOperator.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="238">
-              <caret line="130" lean-forward="true" selection-start-line="130" selection-end-line="130" />
-              <folding>
-                <element signature="e#0#29#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="-8">
+              <caret line="100" column="37" selection-start-line="100" selection-start-column="37" selection-end-line="100" selection-end-column="37" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="result.csv" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/result/result.csv">
+      <file leaf-file-name="DataGenerator.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/DataGenerator.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="315">
-              <caret line="21" column="72" selection-start-line="21" selection-start-column="72" selection-end-line="21" selection-end-column="72" />
+            <state relative-caret-position="620">
+              <caret line="591" column="20" selection-start-line="591" selection-start-column="20" selection-end-line="591" selection-end-column="20" />
+              <folding>
+                <element signature="e#0#29#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -64,6 +60,15 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="330">
               <caret line="22" column="30" lean-forward="true" selection-start-line="22" selection-start-column="30" selection-end-line="22" selection-end-column="30" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="result.csv" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/result/result.csv">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="15">
+              <caret line="1" column="40" selection-start-line="1" selection-start-column="40" selection-end-line="1" selection-end-column="40" />
             </state>
           </provider>
         </entry>
@@ -79,8 +84,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>INF</find>
-      <find>2.0*</find>
       <find>self.optimize</find>
       <find>opt</find>
       <find>, opt</find>
@@ -108,6 +111,8 @@
       <find>route</find>
       <find>.trip</find>
       <find>drawTripsGA</find>
+      <find>optimize</find>
+      <find>optimization</find>
       <find>Schedule</find>
     </findStrings>
   </component>
@@ -130,11 +135,11 @@
         <option value="$PROJECT_DIR$/RequestGenerator.py" />
         <option value="$PROJECT_DIR$/Shuttle.py" />
         <option value="$PROJECT_DIR$/Schedule.py" />
-        <option value="$PROJECT_DIR$/GAOperator.py" />
         <option value="$PROJECT_DIR$/Visualization.py" />
+        <option value="$PROJECT_DIR$/result/result.csv" />
+        <option value="$PROJECT_DIR$/GAOperator.py" />
         <option value="$PROJECT_DIR$/Simulator.py" />
         <option value="$PROJECT_DIR$/DataGenerator.py" />
-        <option value="$PROJECT_DIR$/result/result.csv" />
       </list>
     </option>
   </component>
@@ -247,9 +252,9 @@
       <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="8" />
       <window_info anchor="bottom" id="Python Console" order="11" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49940476" visible="true" weight="0.28657314" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49940476" visible="true" weight="0.28657314" />
       <window_info anchor="bottom" id="Terminal" order="10" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25" />
       <window_info anchor="right" id="R Packages" order="6" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="right" id="R Graphics" order="4" />
@@ -351,6 +356,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="861">
           <caret line="69" column="46" lean-forward="true" selection-start-line="31" selection-end-line="69" selection-end-column="46" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -365,6 +373,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="360">
           <caret line="24" selection-start-line="24" selection-end-line="24" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -403,6 +414,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-98">
           <caret line="14" column="16" selection-start-line="14" selection-start-column="16" selection-end-line="14" selection-end-column="16" />
+          <folding>
+            <element signature="e#0#29#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -417,6 +431,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="275">
           <caret line="37" selection-start-line="37" selection-end-line="57" selection-end-column="23" />
+          <folding>
+            <element signature="e#0#27#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -437,30 +454,20 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/GAOperator.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="165" column="53" lean-forward="true" selection-start-line="165" selection-start-column="53" selection-end-line="165" selection-end-column="53" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Simulator.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="350">
-          <caret line="138" column="41" selection-start-line="138" selection-start-column="41" selection-end-line="138" selection-end-column="41" />
-          <folding>
-            <element signature="e#0#37#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Schedule.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="549">
+        <state relative-caret-position="1615">
           <caret line="113" lean-forward="true" selection-start-line="113" selection-end-line="113" />
           <folding>
             <element signature="e#0#27#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/result/result.csv">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="1" column="40" selection-start-line="1" selection-start-column="40" selection-end-line="1" selection-end-column="40" />
         </state>
       </provider>
     </entry>
@@ -471,20 +478,30 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/DataGenerator.py">
+    <entry file="file://$PROJECT_DIR$/GAOperator.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="130" lean-forward="true" selection-start-line="130" selection-end-line="130" />
+        <state relative-caret-position="-8">
+          <caret line="100" column="37" selection-start-line="100" selection-start-column="37" selection-end-line="100" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Simulator.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="12" column="60" selection-start-line="12" selection-start-column="60" selection-end-line="12" selection-end-column="60" />
           <folding>
-            <element signature="e#0#29#0" expanded="true" />
+            <element signature="e#0#37#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/result/result.csv">
+    <entry file="file://$PROJECT_DIR$/DataGenerator.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="315">
-          <caret line="21" column="72" selection-start-line="21" selection-start-column="72" selection-end-line="21" selection-end-column="72" />
+        <state relative-caret-position="620">
+          <caret line="591" column="20" selection-start-line="591" selection-start-column="20" selection-end-line="591" selection-end-column="20" />
+          <folding>
+            <element signature="e#0#29#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
