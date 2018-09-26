@@ -15,7 +15,7 @@ class GAOperator:
         self.genes = []
         self.costs = []
         self.gaN = gaN # the number of GA generation
-        self.INF = 2.0  # regarding as cost function
+        self.INF = 2.0*DG.reqN  # regarding as cost function
 
         self.reqN = DG.reqN
         self.offRs = DG.offRs
@@ -26,7 +26,7 @@ class GAOperator:
         self.depot = DG.depot
         self.localOpt = DG.localOpt
         self.mergeTrips = DG.mergeTrips
-        self.getCostGA = DG.getCostGA
+        self.getCost = DG.getCost
         self.getSimilarRequest = DG.getSimilarRequest
         self.shuttleAbleS = DG.shuttleAbleS
         self.Ngene = Ngene  # the size of gene pool
@@ -56,8 +56,8 @@ class GAOperator:
             i2 = random.randrange(Sgene)
             self.genes.append(self.genes[i1].crossover(self.genes[i2]))
 
-        self.genes.sort(key=lambda gene: self.getCostGA(gene))
-        self.costs.append(self.getCostGA(self.genes[0]))
+        self.genes.sort(key=lambda gene: self.getCost(gene))
+        self.costs.append(self.getCost(self.genes[0]))
         self.init = copy.deepcopy(self.genes[0])
         if self.costs[0] >= self.INF: # check initial is serviceable
             print("initial is shit!")
@@ -89,7 +89,7 @@ class GAOperator:
 
                 # Optimization___________
                 for j in range(Ngene):
-                    if self.getCostGA(self.genes[j]) < self.INF:
+                    if self.getCost(self.genes[j]) < self.INF:
                         genejOpt = self.optimize(copy.deepcopy(self.genes[j]))
                         if self.geneAble(genejOpt): self.genes[j] = genejOpt
                         genejOpt = self.optimization(copy.deepcopy(self.genes[j]))
@@ -97,7 +97,7 @@ class GAOperator:
                         genejOpt = self.ropti(copy.deepcopy(self.genes[j]))
                         if self.geneAble(genejOpt): self.genes[j] = genejOpt
 
-                self.genes.sort(key=lambda gene: self.getCostGA(gene))
+                self.genes.sort(key=lambda gene: self.getCost(gene))
 
                 for j in range(Ngene - 1, 3, -1):
                     if self.genes[j] == self.genes[j - 4]:
@@ -109,8 +109,11 @@ class GAOperator:
                 if (len(best.rejects) < len(self.genes[0].rejects)):
                     self.genes[0] = copy.deepcopy(best)
                 else: best = copy.deepcopy(self.genes[0])
-                self.costs.append(self.getCostGA(self.genes[0]))
+                self.costs.append(self.getCost(self.genes[0]))
                 # saving best's cost
+                if self.costs[i+1] >= self.INF :
+                    print("ERROR : Best's cost is INF")
+                    break
 
                 if (self.costs[i] > self.costs[i + 1]):
                     print("{}% improved | {}"\
@@ -134,10 +137,10 @@ class GAOperator:
 
         print('\nInit: ')
         print(self.init)
-        print(self.chromoAble(self.init))
+        print(self.geneAble(self.init))
         print('\nResult : ')
         print(self.genes[0])
-        print(self.chromoAble(self.genes[0]))
+        print(self.geneAble(self.genes[0]))
         pass
 
     def __str__(self):
@@ -174,7 +177,7 @@ class GAOperator:
         shuttles = copy.deepcopy(gene.shuttles)
         for r in gene.rejects:
             for i in range(len(shuttles)):
-                k = self.mergeTrips(shuttles[i].trips,\
+                k = self.mergeTrips(shuttles[i].trip,\
                                     [r, -r])
                 if k != None:
                     nshut = Shuttle(shuttles[i].loc, k[:])

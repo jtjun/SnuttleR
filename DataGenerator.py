@@ -17,13 +17,14 @@ class DataGenerator:
         self.dists = MG.dists
         self.depot = MG.depot
         self.distdepot = MG.distdepot
+        self.getLocDist = MG.getLocDist
         self.staN = MG.staN  # number of stations
 
         self.requests = RG.requests
         self.runT = RG.runT # running time of simulator
         self.reqN = RG.reqN # number of requests
         self.ST = RG.ST  # similar table
-        reqs = list(range(1, self.n + 1))
+        reqs = list(range(1, self.reqN + 1))
         self.offRs = list(filter(lambda req: self.requests[req - 1][4] == 0, reqs))
 
         self.shutN = shutN
@@ -53,21 +54,21 @@ class DataGenerator:
                     else: ct[i].append(-1)
         return ct
 
-    def geneoAble(self, chromo):
-        trips = chromo.trips
+    def geneAble(self, gene):
+        shuttles = gene.shuttles
         tripSet = []
 
-        for trip in trips:
-            if not self.available(trip) : return False
-            tripSet += trip
+        for shuttle in shuttles:
+            if not self.shuttleAbleS(shuttle)[0] : return False
+            tripSet += shuttle.trip
 
-        for i in range(self.n):
+        for i in range(self.reqN):
             i += 1
             if tripSet.count(i) > 1:
-                print("there are more %d s in trips" % i)
+                #print("there are more %d s in trips" % i)
                 return False
             if tripSet.count(-i) > 1:
-                print("there are more %d s in trips" % -i)
+                #print("there are more %d s in trips" % -i)
                 return False
         return True
 
@@ -120,7 +121,7 @@ class DataGenerator:
             destTime = self.requests[abs(dest) - 1][(abs(dest) - dest) // abs(dest)]
 
             # shuttle arrived next destination
-            if i== 0 : t += self.MG.getLocDist(loc, destSta)
+            if i== 0 : t += self.getLocDist(loc, destSta)
             else :
                 depa = trip[i-1]
                 depaSta = self.requests[abs(depa) - 1][((abs(depa) - depa) // abs(depa)) + 1]
@@ -146,62 +147,26 @@ class DataGenerator:
         # 2.0*n : impossible Shuttle
         # 1.0 : index_r > index_-r
         # 0.01 : duplicate
-        totSlack = self.n
+        totSlack = self.reqN
         reqs = schedule.rejects[:]
         for shuttle in schedule.shuttles :
             travle = (shuttle.before + shuttle.trip)
             for r in travle :
                 ar = abs(r)
                 if travle.index(ar) >= travle.index(-ar):
-                    return 2.0*self.n + ar
+                    return 2.0*self.reqN + ar
             reqs += travle
 
             ableS = self.shuttleAbleS(shuttle)
             if not ableS[0] :
-                return 2.0*self.n
+                return 2.0*self.reqN
             totSlack += ableS[1]
 
         for r in reqs :
-            if reqs.count(r) != 1 : return 2.0*self.n + 0.01*abs(r)
+            if reqs.count(r) != 1 :
+                return 2.0*self.reqN + 0.01*abs(r)
 
-        return len(schedule.rejects) + self.n/totSlack
-
-    def getCostGA(self, chromo):
-        if not self.chromoAble(chromo):
-            return 2.0 * chromo.reqN
-
-        sk = chromo.reqN
-        for trip in chromo.trips:
-            ts = []
-            stas = []
-            l = 0
-            for i in trip:
-                ia = abs(i)
-                ts.append(self.requests[ia - 1][(ia - i) // ia])
-                stas.append(self.requests[ia - 1][((ia - i) // ia) + 1])
-                l += 1
-
-            ats = [ts[0]]
-
-            for i in range(l - 1):
-                d = self.dists[stas[i]][stas[i + 1]]
-                at = ats[i] + d
-
-                if trip[i + 1] < 0:
-                    if ts[i + 1] < at:
-                        return  2.0 * chromo.reqN
-                        # not available trip
-                    else:
-                        ats.append(at)
-
-                if trip[i + 1] > 0:
-                    if ts[i + 1] > at:
-                        sk += (ts[i + 1] - at) / self.T
-                        ats.append(ts[i + 1])
-                    else:
-                        ats.append(at)
-
-        return len(chromo.rejects) + chromo.reqN / sk
+        return len(schedule.rejects) + self.reqN/totSlack
 
     def makeL(self, requests):
         L = []
@@ -219,12 +184,12 @@ class DataGenerator:
 
     def getSimilarRequest(self, requestidx):
         t = random.random()
-        for i in range(self.n):
+        for i in range(self.reqN):
             if t < self.ST[requestidx][i]:
                 return i
             else:
                 t -= self.ST[requestidx][i]
-        return self.n - 1
+        return self.reqN - 1
 
     def optimize(self, shuttles0, shutT):
         shuttlesO = copy.deepcopy(shuttles0)

@@ -7,8 +7,9 @@ class Schedule: # using as gene (chromosome)
     # serviced : an array of requests which is serviced
     # rejects : an array of rejected requests
     # reqS : an array of requests which is considered
+    # reqN: number of considered requests
 
-    def __init__(self, shuttles, reqS):
+    def __init__(self, shuttles, reqS=[]):
         self.shuttles = shuttles
         self.reqS = reqS
         self.reqN = len(reqS)
@@ -47,6 +48,28 @@ class Schedule: # using as gene (chromosome)
                     for j in range(len(self.shuttles[i].trip)):
                         if self.shuttles[i].trip[j] != other.shuttles[i].trip[j]: return False
             return True
+
+    def getServiced(self, n):
+        serviced = []
+        allTrip = []
+        for (i, shuttle) in enumerate(self.shuttles) :
+            serviced += shuttle.before[:]
+            trip = shuttle.trip
+            allTrip += trip
+
+        noPos = []
+        noNeg = []
+        for i in range(1, n+1) :
+            if i not in allTrip :
+                noPos.append(i)
+            if -i not in allTrip :
+                noNeg.append(-i)
+
+        print('{} {}'.format(noPos, len(noPos)))
+        print('{} {}'.format(noNeg, len(noNeg)))
+        print('')
+
+        return serviced
 
     def mutation(self, x, y):
         # change position of request x and request y

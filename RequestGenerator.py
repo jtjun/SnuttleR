@@ -137,7 +137,7 @@ class RequestGenerator():
 
     def cluster2(self, p):
         np = int(self.reqN * p)
-        RG = RequestGenerator(self.Map, 'CS', np, self.T)
+        RG = RequestGenerator(self.Map, 'CS', np, self.runT)
         requests1 = RG.requests
         requests2 = []
         offR = 0
