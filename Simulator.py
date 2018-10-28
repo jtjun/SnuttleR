@@ -10,7 +10,7 @@ from Shuttle import Shuttle
 class Simulator:
     # as time goes by simulate situation
     def __init__(self, m = 20, n = 100, T = 1000, shutN = 10, shutC = 5, offP = 0.6, \
-                 MapType = 'clust', ReqType = 'CS2', gaN = 10, upp = False, lP = 0):
+                 MapType = 'clust', ReqType = 'CS2', gaN = 5, upp = False, lP = 0):
         self.m = m  # number of stations
         self.n = n  # number of requests
         self.shutN = shutN  # number of shuttles
@@ -57,6 +57,7 @@ class Simulator:
 
         if off :
             if typ == 'EDF' : schedule = self.DG.generateEDF(schedule, 0, True)
+            if typ == 'MSF': schedule = self.DG.generateMSF(schedule, 0, True)
             if typ == 'LLF' : schedule = self.DG.generateLLF(schedule, 0, True)
             if typ == 'GA' : schedule = self.GAINIT(True)
             self.report(schedule, typ + ' off ' + str(numm))
@@ -65,6 +66,7 @@ class Simulator:
         # initialize schedule
         requestsT = list(filter(lambda r: r[4] < 0, requests))
         if typ == 'EDF' : schedule = self.DG.generateEDF(schedule, 0)
+        if typ == 'MSF': schedule = self.DG.generateMSF(schedule, 0)
         if typ == 'LLF' : schedule = self.DG.generateLLF(schedule, 0)
         if typ == 'GA' : schedule = self.GAINIT(False)
         inRjs = len(schedule.rejects)
@@ -126,6 +128,7 @@ class Simulator:
                     # now all shuttles has only 'have to go'
 
             if typ == 'EDF': schedule = self.DG.generateEDF(schedule, t)
+            if typ == 'MSF': schedule = self.DG.generateMSF(schedule, t)
             if typ == 'LLF': schedule = self.DG.generateLLF(schedule, t)
             if typ == 'GA' : schedule = self.DG.generateGA(schedule, t)
 
@@ -197,17 +200,19 @@ class Simulator:
         print('_____________________\n')
         return warring
 
-    def saving(self, edf, llf, ga):
-        e, l, g = edf[0], llf[0], ga[0]
+    def saving(self, edf, msf, llf, ga):
+        e, m, l, g = edf[0], msf[0], llf[0], ga[0]
         el = (1 - 1.0 * e / self.n) * 100
+        ml = (1 - 1.0 * m / self.n) * 100
         ll = (1 - 1.0 * l / self.n) * 100
         gl = (1 - 1.0 * g / self.n) * 100
 
-        f = open("../result/result.csv", 'a')
-        f.write("\n{e},{l},{g},|,{m},{n},{o},{sn},{sc},|,{el},{ll},{gl},|init,{ei},{li},{gi},{rds}"\
-                .format(e=e,l=l,g=g,\
-                        m=self.m,n=self.n,o=self.offP,sn=self.shutN,sc=self.shutC,rds=self.rDS,\
-                        el=el,ll=ll,gl=gl,ei=edf[1],li=llf[1],gi=ga[1]))
+        f = open("./result/result.csv", 'a')
+        f.write("\n{e},{m},{l}{g},|,{mn},{n},{o},{sn},{sc},|,{el},{ml},{ll},{gl},|init,{ei},{mi},{li},{gi},{rds}"\
+                .format(e=e,m=m,l=l,g=g,\
+                        mn=self.m,n=self.n,o=self.offP,sn=self.shutN,sc=self.shutC,rds=self.rDS,\
+                        el=el,ml=ml,ll=ll,gl=gl,\
+                        ei=edf[1],mi=msf[1],li=llf[1],gi=ga[1]))
         f.close()
 
 if __name__ == "__main__":
@@ -216,7 +221,8 @@ if __name__ == "__main__":
     for i in range(n) :
         S = Simulator(MapType='clust', ReqType='CS2')
         edf = S.__main__(0, 'EDF', off)
+        msf = S.__main__(0, 'MSF', off)
         llf = S.__main__(0, 'LLF', off)
         ga = S.__main__(0, 'GA', off)
-        S.saving(edf,llf,ga)
-        print('EDF : {e} | LLF : {l} | GA : {g}\n'.format(e = edf[0], l=llf[0], g=ga[0]))
+        S.saving(edf,msf,llf,ga)
+        print('EDF : {e} | MSF : {m} | LLF : {l} | GA : {g}\n'.format(e = edf[0], m=msf[0], l=llf[0], g=0))#g=ga[0]))

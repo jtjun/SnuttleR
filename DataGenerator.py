@@ -139,6 +139,43 @@ class DataGenerator:
         if t == t0 : t0 -= 1
         return [True, slack/(t-t0)]
 
+    def shuttleAbleSOF(self, shuttle):
+        fitty = 0
+        loc = shuttle.loc
+        trip = shuttle.trip[:]
+        for r in trip :
+            if trip.count(r) != 1 : return [False, 0]
+        t = shuttle.t + 0
+        t0 = t
+
+        for i in range(len(trip)) :
+            dest = trip[i]
+            destSta = self.requests[abs(dest) - 1][((abs(dest) - dest) // abs(dest)) + 1]
+            destTime = self.requests[abs(dest) - 1][(abs(dest) - dest) // abs(dest)]
+
+            # shuttle arrived next destination
+            if i== 0 : t += self.MG.getLocDist(loc, destSta)
+            else :
+                depa = trip[i-1]
+                depaSta = self.requests[abs(depa) - 1][((abs(depa) - depa) // abs(depa)) + 1]
+                t += self.dists[depaSta][destSta]
+
+            fitty += (destTime - t) ** 2
+            if dest > 0:  # pick up
+                if destTime >= t : # arrive early : waiting
+                    t = destTime
+                # else : arrive late / don't care
+
+            elif dest < 0:  # drop off
+                if destTime < t : # shuttle late for drop off
+                    late = t-destTime
+                    if late > self.lP : return [False, 0]
+                    # else : accpetable late
+                # else : # shuttle not late / don't care
+
+        if t == t0 : t0 -= 1
+        return [True, fitty]
+
     def getCost(self, schedule):
         # 2.0*n : impossible Shuttle
         # 1.0 : index_r > index_-r
@@ -428,8 +465,8 @@ class DataGenerator:
         # optimize
         return self.localOpt(routes, t, schedule.rejects)
 
-    # _______________________LLF_________________________
-    def generateLLF(self, schedule, t, off=False): # EDF with Maximize Slack Time
+    # _______________________MSF_________________________
+    def generateMSF(self, schedule, t, off=False): # EDF with Maximize Slack Time
         already = []
         for shuttle in schedule.shuttles :
             already += shuttle.trip + shuttle.before
@@ -475,6 +512,67 @@ class DataGenerator:
 
             else : # available, So find Maximum Slack Trip
                 jSlack.sort(key = lambda js : -js[1])
+                j = jSlack[0][0]
+                shuttle = routes[j]
+                route = shuttle.trip
+                tript = self.subL(self.L, route + [r, -r])
+
+                nshuttle = Shuttle(shuttle.loc, tript, shuttle.before[:], t)
+                routes[j] = nshuttle
+
+                if r in schedule.rejects:
+                    schedule.rejects.remove(r)
+
+        # optimize
+        return self.localOpt(routes, t, schedule.rejects)
+
+    # _______________________LLF_________________________
+    def generateLLF(self, schedule, t, off=False):  # EDF with Least Laxity First
+        already = []
+        for shuttle in schedule.shuttles:
+            already += shuttle.trip + shuttle.before
+
+        reqs = list(enumerate(self.requests[:]))
+        requests = list(filter(lambda req: ((req[0] + 1) not in already) and (req[1][4] <= t), reqs))
+        if off: requests = reqs
+
+        routes = copy.deepcopy(schedule.shuttles)
+        L = self.makeL(requests)  # early deadline sorting
+        for r in L:
+            jSlack = []
+            if r < 0: continue
+            j, l = 0, len(routes)
+            while j < l:
+                shuttle = routes[j]
+                route = shuttle.trip
+                mutab = True
+                for rr in route:  # checking available
+                    if self.CT[abs(r) - 1][abs(rr) - 1] < 0:
+                        mutab = False
+                        break
+                if mutab:  # Mutually available
+                    tript = self.subL(self.L, route + [r, -r])
+                    nshuttle = Shuttle(shuttle.loc, tript, shuttle.before[:], t)
+                    ableS = self.shuttleAbleSOF(nshuttle)
+                    if ableS[0]:
+                        jSlack.append((j, ableS[1]))
+                j += 1
+
+            if len(jSlack) < 1:
+                if len(routes) >= self.shutN:
+                    if r not in schedule.rejects:
+                        schedule.rejects.append(r)
+                else:  # there are new shuttle
+                    shuttle = Shuttle(self.depot, [r, -r], [], t)
+                    if self.shuttleAbleSOF(shuttle)[0]:
+                        routes.append(shuttle)
+                        if r in schedule.rejects:
+                            schedule.rejects.remove(r)
+                    elif r not in schedule.rejects:
+                        schedule.rejects.append(r)
+
+            else:  # available, So find Maximum Slack Trip
+                jSlack.sort(key=lambda js: js[1])
                 j = jSlack[0][0]
                 shuttle = routes[j]
                 route = shuttle.trip
