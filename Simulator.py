@@ -208,7 +208,7 @@ class Simulator:
         gl = (1 - 1.0 * g / self.n) * 100
 
         f = open("./result/result.csv", 'a')
-        f.write("\n{e},{m},{l}{g},|,{mn},{n},{o},{sn},{sc},|,{el},{ml},{ll},{gl},|init,{ei},{mi},{li},{gi},{rds}"\
+        f.write("\n{e},{m},{l},{g},|,{mn},{n},{o},{sn},{sc},|,{el},{ml},{ll},{gl},|init,{ei},{mi},{li},{gi},{rds}"\
                 .format(e=e,m=m,l=l,g=g,\
                         mn=self.m,n=self.n,o=self.offP,sn=self.shutN,sc=self.shutC,rds=self.rDS,\
                         el=el,ml=ml,ll=ll,gl=gl,\
@@ -225,4 +225,4 @@ if __name__ == "__main__":
         llf = S.__main__(0, 'LLF', off)
         ga = S.__main__(0, 'GA', off)
         S.saving(edf,msf,llf,ga)
-        print('EDF : {e} | MSF : {m} | LLF : {l} | GA : {g}\n'.format(e = edf[0], m=msf[0], l=llf[0], g=0))#g=ga[0]))
+        print('EDF : {e} | MSF : {m} | LLF : {l} | GA : {g}\n'.format(e = edf[0], m=msf[0], l=llf[0], g=ga[0]))
