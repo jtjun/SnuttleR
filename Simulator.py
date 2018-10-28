@@ -9,29 +9,27 @@ from Shuttle import Shuttle
 
 class Simulator:
     # as time goes by simulate situation
-    def __init__(self, staN = 20, reqN = 100, runT = 1000, shutN = 10, shutC = 5, offP = 0.6, \
-                 MapType = 'clust', ReqType = 'CS2', gaN = 5, Ngene = 1000, Sgene = 20, upp = False, lateP = 0):
-        self.staN = staN  # number of stations
-        self.reqN = reqN  # number of requests
-        self.runT = runT  # running time
+    def __init__(self, m = 20, n = 100, T = 1000, shutN = 10, shutC = 5, offP = 0.6, \
+                 MapType = 'clust', ReqType = 'CS2', gaN = 10, upp = False, lP = 0):
+        self.m = m  # number of stations
+        self.n = n  # number of requests
         self.shutN = shutN  # number of shuttles
+        self.T = T  # running time
         self.shutC = shutC # capacity of shuttle
         self.offP = offP # ratio of offline requests
         self.gaN = gaN # number of GA steps
-        self.Ngene = Ngene # the size of gene pool
-        self.Sgene = Sgene  # the number of genes which will survive
         self.upp = upp # convert dists to upper bound
-        self.lateP = lateP # acceptable Late time Policy
+        self.lP = lP # acceptable Late time Policy
 
-        self.MG = MapGenerator(self.staN, MapType, self.upp)
-        self.RG = RequestGenerator(self.MG, ReqType, self.reqN, self.runT, self.offP)
-        self.DG = DataGenerator(self.MG, self.RG, self.shutN, self.lateP)
+        self.MG = MapGenerator(self.m, MapType, self.upp)
+        self.RG = RequestGenerator(self.MG, ReqType, self.n, self.T, self.offP)
+        self.DG = DataGenerator(self.MG, self.RG, self.shutN, self.gaN, self.lP)
         self.requests = self.RG.requests[:]
 
         print(self.MG)
         print(self.RG)
         print('Stations : {m} | Requests : {r} | Shuttles : {s}\nTime : {t} | Off proportion : {o} | Capacity : {c}\n'\
-              .format(m=self.staN, r=self.reqN, s=self.shutN, t=self.runT, o=self.offP, c=self.shutC))
+              .format(m=self.m, r=self.n, s=self.shutN, t=self.T, o=self.offP, c=self.shutC))
         print('------------------------------------')
         self.rDS = self.RG.rDS()
         pass
@@ -41,8 +39,15 @@ class Simulator:
         return ret
 
     def GAINIT(self, off):
-        GAOP = GAOperator(self.DG, self.gaN, self.Ngene, self.Sgene, off)
-        return GAOP.getResult()
+        onlR = int(self.n*(1-self.offP))
+        GAOP = GAOperator(self.DG, 0, onlR, self.gaN, off)
+        trips = GAOP.getResult()
+        rejs = GAOP.getRejs()
+        shuttles =[]
+        for trip in trips:
+            shuttle = Shuttle(self.MG.depot, trip, [], 0)
+            shuttles.append(shuttle)
+        return Schedule(shuttles, rejs)
 
     def __main__(self, numm, typ, off): # when call the main, new schedule is generated
         requests = self.requests[:]
@@ -66,14 +71,14 @@ class Simulator:
         print("{}'s initial {}".format(typ, inRjs))
 
         # time is ticking
-        for t in range(1, self.runT) :
+        for t in range(1, self.T) :
             # print('{t}\n{s}\n___________________\n'.format(t=t, s=schedule))
             # moving shuttles
             for shuttle in schedule.shuttles :
-                if len(shuttle.after) <= 0 :
+                if len(shuttle.trip) <= 0 :
                     shuttle.moveTo(self.MG.depot, t)
                     continue
-                dest = shuttle.after[0]
+                dest = shuttle.trip[0]
                 destSta = self.requests[abs(dest) - 1][((abs(dest) - dest) // abs(dest))+1]
                 destTime = self.requests[abs(dest) - 1][(abs(dest) - dest) // abs(dest)]
 
@@ -84,24 +89,25 @@ class Simulator:
                     # if destTime > t : customer not arrived yet, waiting
                     if destTime <= t : # customer arrived
                         if shuttle.loc == sta : # shuttle arrived
-                            custN = shuttle.getCustomN()
+                            custN = shuttle.getCustN()
                             if custN >= self.shutC :
                                 print('ERROR : exceed the shuttle capacity {}'.format(custN))
-                                return False
                             shuttle.before.append(dest)
-                            shuttle.after = shuttle.after[1:]
+                            shuttle.trip = shuttle.trip[1:]
                         # else : shuttle not arrived yet
 
                 elif dest < 0 : # drop off
-                    if shuttle.loc == sta:  # shuttle arrived
-                        shuttle.before.append(dest)
-                        shuttle.after = shuttle.after[1:]
-
-                        if destTime < t : # shuttle late for drop off
+                    if destTime < t : # shuttle late for drop off
+                        if shuttle.loc == sta : # shuttle arrived anyway
+                            shuttle.before.append(dest)
+                            shuttle.trip = shuttle.trip[1:]
                             late.append(str(dest)+' late : '+str((t-destTime)))
-                        # else : // destTime >= t shuttle not late
 
-                    # else : shuttle not arrived yet
+                    if destTime >= t : # shuttle not late
+                        if shuttle.loc == sta : # shuttle arrived well
+                            shuttle.before.append(dest)
+                            shuttle.trip = shuttle.trip[1:]
+                        # else : shuttle not arrived yet
 
                 else : # dest == 0 : error
                     print("ERROR : Requests is ZERO")
@@ -114,16 +120,38 @@ class Simulator:
             else: continue  # there are no new requests
 
             # online processing if there are new requests
+            if typ in ['empty']:
+                for shuttle in schedule.shuttles :
+                    shuttle.trip = self.haveToGo(shuttle)[:]
+                    # now all shuttles has only 'have to go'
+
             if typ == 'EDF': schedule = self.DG.generateEDF(schedule, t)
-            elif typ == 'LLF': schedule = self.DG.generateLLF(schedule, t)
-            elif typ == 'GA' : schedule = self.DG.generateGA(schedule, t)
-            else : print('ERROR : Simulator type error')
+            if typ == 'LLF': schedule = self.DG.generateLLF(schedule, t)
+            if typ == 'GA' : schedule = self.DG.generateGA(schedule, t)
 
         # time ticking is done
         self.late = late
         warring = self.report(schedule, typ+' '+str(numm))
-        if warring > 0 : return [self.reqN, inRjs]
+        if warring > 0 : return [self.n, inRjs]
         return [len(schedule.rejects), inRjs]
+
+    def haveToGo(self, shuttle) :
+        ntrip = []
+        for r in shuttle.before :
+            if -r not in shuttle.before:
+                if r > 0 : ntrip.append(-r)
+                else :
+                    print('ERROR : trip has -r but not r')
+                    print(shuttle.before, shuttle.trip)
+                    return [self.n+1]
+
+        if len(shuttle.before) == 0 :
+            if len(shuttle.trip) > 0 :
+                r = abs(shuttle.trip[0])
+                ntrip = [r, -r]
+            else :
+                print('ERROR : totally empty shuttle')
+        return ntrip
 
     def report(self, schedule, numm):
         warring = 0
@@ -132,27 +160,27 @@ class Simulator:
         print(len(schedule.shuttles))
         for shuttle in schedule.shuttles :
             shutable = self.DG.checkAble(shuttle)
-            print(shuttle.before, shuttle.after, shutable)
+            print(shuttle.before, shuttle.trip, shutable)
             if not shutable :
                 print("ERROR : *This Shuttle is NOT serviceable.*")
                 warring += 1
-        if not self.DG.geneAble(schedule) :
-            print('ERROR : {} (0.01:duplicate / 1.0:index)'.format(self.DG.getCost(schedule)))
+        if self.DG.getCost(schedule) >= 2.0*self.n :
+            print('ERROR : 0.01:duplicate / 1.0:index {}'.format(self.DG.getCost(schedule)))
             print('_____________________\n')
-            #return 0
+            return 0
         print('_____________________\n')
 
-        serviced = schedule.getServiced(self.reqN)
+        serviced = schedule.getServiced(self.n)
         serviced.sort()
 
         non =[]
-        for i in range(-self.reqN, self.reqN+1):
+        for i in range(-self.n, self.n+1):
             if i == 0 : continue
             if i not in serviced : non.append(i)
 
         left = []
         for shuttle in schedule.shuttles :
-            left += shuttle.after
+            left += shuttle.trip
 
         print('{} serviced'.format(serviced))
         print('{} non'.format(non))
@@ -171,14 +199,14 @@ class Simulator:
 
     def saving(self, edf, llf, ga):
         e, l, g = edf[0], llf[0], ga[0]
-        el = (1 - 1.0 * e / self.reqN) * 100
-        ll = (1 - 1.0 * l / self.reqN) * 100
-        gl = (1 - 1.0 * g / self.reqN) * 100
+        el = (1 - 1.0 * e / self.n) * 100
+        ll = (1 - 1.0 * l / self.n) * 100
+        gl = (1 - 1.0 * g / self.n) * 100
 
-        f = open("./result/result.csv", 'a')
+        f = open("../result/result.csv", 'a')
         f.write("\n{e},{l},{g},|,{m},{n},{o},{sn},{sc},|,{el},{ll},{gl},|init,{ei},{li},{gi},{rds}"\
                 .format(e=e,l=l,g=g,\
-                        m=self.staN,n=self.reqN,o=self.offP,sn=self.shutN,sc=self.shutC,rds=self.rDS,\
+                        m=self.m,n=self.n,o=self.offP,sn=self.shutN,sc=self.shutC,rds=self.rDS,\
                         el=el,ll=ll,gl=gl,ei=edf[1],li=llf[1],gi=ga[1]))
         f.close()
 
@@ -191,5 +219,4 @@ if __name__ == "__main__":
         llf = S.__main__(0, 'LLF', off)
         ga = S.__main__(0, 'GA', off)
         S.saving(edf,llf,ga)
-        print('EDF : {e} ({ei}) | LLF : {l} ({li}) | GA : {g} ({gi})\n'\
-              .format(e = edf[0], ei = edf[1], l=llf[0], li = llf[1], g=ga[0], gi=ga[1]))
+        print('EDF : {e} | LLF : {l} | GA : {g}\n'.format(e = edf[0], l=llf[0], g=ga[0]))

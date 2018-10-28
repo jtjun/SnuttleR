@@ -2,43 +2,34 @@ import math
 import random
 
 class MapGenerator:
-    # staN : the number of stations
+    # m : the number of stations
     # stations : locations of stations [tuple of 2 real numbers and name (x, y, name)] == map info
     # dists : matrix which has the distance info
-    # typ : type of map
-    # upp : upper bound processing trigger
-
-    # */ we have to change road : from euclid to x,y axis
-
-    def __init__(self, staN = 20, typ = 'clust', upp = False):
-        self.staN = staN
-        self.stations = []
-
+    def __init__(self, m = 20, typ = 'nomal', upp = True):
+        self.m = m
         if typ == 'nomal' :
-            for j in range(self.staN) :
+            self.stations = []
+            for j in range(self.m) :
                 sta = (random.random()*100, random.random()*100, j)
                 while sta in self.stations :
                     sta = (random.random() * 100, random.random() * 100, j)
                 self.stations.append(sta)
             # To ensure all stations are different
 
-        elif typ == 'clust' :
-            for j in range(self.staN//2):
+        if typ == 'clust' :
+            self.stations = []
+            for j in range(self.m//2):
                 sta = (random.random() * 30, random.random() * 30, j)
                 self.stations.append(sta)
             # To ensure all stations are different
 
-            for j in range(self.staN//2, self.staN):
+            for j in range(self.m//2, self.m):
                 sta = (random.random() * 30 + 70, random.random() * 30 + 70, j)
                 self.stations.append(sta)
 
-        else :
-            print("ERROR : Map type doesn't exist")
-            pass
-
         self.depot = (50, 50, -1)
         self.distdepot = []
-        for j in range(self.staN):
+        for j in range(self.m):
             self.distdepot.append(math.sqrt((self.stations[j][0]-self.depot[0])**2
                                             +(self.stations[j][1]-self.depot[1])**2))
 
@@ -48,14 +39,14 @@ class MapGenerator:
 
     def __str__(self):
         ret = ""
-        ret += "The number of stations : {m}\n".format(m = self.staN)
+        ret += "The number of stations : {m}\n".format(m = self.m)
         ret += "Depot: {c}\n".format(c = self.depot)
         for coord in self.stations: ret += "{c}\n".format(c = coord)
         ret += "------------------------------------\n"
         return ret
 
     def getDists(self):
-        m = self.staN # number of sta
+        m = self.m # number of sta
         dists = [[None] * m for i in range(m)]
         for i in range(m) :
             for j in range(m) :
