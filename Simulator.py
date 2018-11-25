@@ -7,6 +7,8 @@ from Visualization import Visualization
 from GAOperator import GAOperator
 from Shuttle import Shuttle
 
+import time
+
 class Simulator:
     # as time goes by simulate situation
     def __init__(self, m = 20, n = 100, T = 1000, shutN = 10, shutC = 5, offP = 0.6, \
@@ -32,6 +34,8 @@ class Simulator:
               .format(m=self.m, r=self.n, s=self.shutN, t=self.T, o=self.offP, c=self.shutC))
         print('------------------------------------')
         self.rDS = self.RG.rDS()
+
+        self.times = []
         pass
 
     def __str__(self):
@@ -50,6 +54,7 @@ class Simulator:
         return Schedule(shuttles, rejs)
 
     def __main__(self, numm, typ, off): # when call the main, new schedule is generated
+        startT = time.time()
         requests = self.requests[:]
         schedule = Schedule([])
         late = []
@@ -133,8 +138,14 @@ class Simulator:
             if typ == 'GA' : schedule = self.DG.generateGA(schedule, t)
 
         # time ticking is done
+        endT = time.time()
         self.late = late
         warring = self.report(schedule, typ+' '+str(numm))
+
+        self.times.append(endT-startT)
+        print(endT-startT)
+        print("\n")
+
         if warring > 0 : return [self.n, inRjs]
         return [len(schedule.rejects), inRjs]
 
@@ -226,3 +237,4 @@ if __name__ == "__main__":
         ga = S.__main__(0, 'GA', off)
         S.saving(edf,msf,llf,ga)
         print('EDF : {e} | MSF : {m} | LLF : {l} | GA : {g}\n'.format(e = edf[0], m=msf[0], l=llf[0], g=ga[0]))
+        print(S.times)
