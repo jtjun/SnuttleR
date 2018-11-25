@@ -553,7 +553,7 @@ class DataGenerator:
                 if mutab:  # Mutually available
                     tript = self.subL(self.L, route + [r, -r])
                     nshuttle = Shuttle(shuttle.loc, tript, shuttle.before[:], t)
-                    ableS = self.shuttleAbleSOF(nshuttle)
+                    ableS = self.shuttleAbleSOFㅊ(nshuttle)
                     if ableS[0]:
                         jSlack.append((j, ableS[1]))
                 j += 1
