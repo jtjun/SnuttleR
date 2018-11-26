@@ -226,8 +226,14 @@ class Simulator:
                         ei=edf[1],mi=msf[1],li=llf[1],gi=ga[1]))
         f.close()
 
+    def saveTime(self):
+        f = open("./result/time.csv", 'a')
+        f.write("{tE},{tM},{tL},{tG}\n"\
+                .format(tE=self.times[0],tM=self.times[1],tL=self.times[2],tG=self.times[3]))
+        f.close()
+
 if __name__ == "__main__":
-    n = 1
+    n = 98
     off = False
     for i in range(n) :
         S = Simulator(MapType='clust', ReqType='CS2')
@@ -238,3 +244,4 @@ if __name__ == "__main__":
         S.saving(edf,msf,llf,ga)
         print('EDF : {e} | MSF : {m} | LLF : {l} | GA : {g}\n'.format(e = edf[0], m=msf[0], l=llf[0], g=ga[0]))
         print(S.times)
+        S.saveTime()
